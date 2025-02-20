@@ -1,7 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, MessageSquare, Heart } from 'lucide-react';
 
 const TravelCommunity = () => {
+  const navigate = useNavigate();
+
+  const handleJoinClick = () => {
+    navigate('/community-post'); // Redirect to the community post page
+  };
+
   return (
     <section className="bg-gray-50 rounded-xl p-8">
       <div className="text-center mb-12">
@@ -36,7 +43,7 @@ const TravelCommunity = () => {
         </div>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1584732200355-486c00295ec9?auto=format&fit=crop&w=800&q=80"
+            src="./src/assets/img/Rishikesh 6.jpg"
             alt="Blog post"
             className="w-full h-48 object-cover"
           />
@@ -59,7 +66,7 @@ const TravelCommunity = () => {
         </div>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1626714485831-c6dde7055612?auto=format&fit=crop&w=800&q=80"
+            src="./src/assets/img/kuari pass_.jpg"
             alt="Blog post"
             className="w-full h-48 object-cover"
           />
@@ -82,7 +89,10 @@ const TravelCommunity = () => {
         </div>
       </div>
       <div className="text-center mt-12">
-        <button className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center">
+        <button
+          className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors inline-flex items-center"
+          onClick={handleJoinClick}
+        >
           <Users className="h-5 w-5 mr-2" />
           Join the Community
         </button>
