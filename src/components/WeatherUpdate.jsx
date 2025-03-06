@@ -9,7 +9,7 @@ const WeatherUpdate = () => {
   ];
 
   return (
-    <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+    <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white my-20">
       <h2 className="text-2xl font-semibold mb-6">Weather Updates</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {weatherData.map((location, index) => (

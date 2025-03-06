@@ -8,8 +8,9 @@ import WeatherUpdate from './components/WeatherUpdate';
 import Footer from "./components/Footer";
 import CommunityPostPage from './components/CommunityPostPage';
 import Auth from './components/auth';
+import { PopularDestinations } from './components/PopularDestinations';
 import TransportOptions from './components/TransportOptions';
-import Activities from './components/Activities';
+import Activities from './components/Activities'; 
 import InteractiveMap from './components/InteractiveMap';
 
 const App = () => {
@@ -22,12 +23,13 @@ const App = () => {
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<>
-            <DestinationSearch />
-            <WeatherUpdate />
-            <InteractiveMap />
-            <TransportOptions/>
-            <Activities />
-            <TravelCommunity />
+              <DestinationSearch />
+              <WeatherUpdate />
+              <InteractiveMap />
+              <TransportOptions />
+              <PopularDestinations />
+              <Activities />
+              <TravelCommunity />
             </>} />
             <Route path="/community-post" element={<CommunityPostPage />} />
           </Routes>
@@ -36,6 +38,6 @@ const App = () => {
       </div>
     </Router>
   );
-}
+};
 
 export default App;
