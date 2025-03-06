@@ -48,7 +48,7 @@ const InteractiveMap = () => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4">Interactive Map</h2>
+      <h2 className="text-3xl font-bold mb-8 text-center">Interactive Map</h2>
       <div id="map" className="w-full h-[400px] rounded-lg overflow-hidden"></div>
       <div className="mt-4 flex items-center space-x-4">
         <div className="flex items-center">
