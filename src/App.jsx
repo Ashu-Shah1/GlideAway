@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 import TravelCommunity from "./components/TravelCommunity";
 import Header from './components/Header';
@@ -7,7 +7,7 @@ import DestinationSearch from './components/DestinationSearch';
 import WeatherUpdate from './components/WeatherUpdate';
 import Footer from "./components/Footer";
 import CommunityPostPage from './components/CommunityPostPage';
-import Auth from './components/auth';
+import Auth from './components/Authentication';
 import { PopularDestinations } from './components/PopularDestinations';
 import TransportOptions from './components/TransportOptions';
 import Activities from './components/Activities'; 
@@ -35,8 +35,9 @@ const App = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Navigate to="/home" />} /> {/* This redirects / to /home */}
         <Route path="/auth" element={<Auth />} />
-        <Route path="/" element={
+        <Route path="/home" element={
           <Layout>
             <DestinationSearch />
             <WeatherUpdate />
