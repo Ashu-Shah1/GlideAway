@@ -8,4 +8,12 @@ const UserSchema = new Schema({
 })
 const userModel = mongoose.model('users',UserSchema)
 
-export default userModel
+const DistrictSchema = new Schema({
+    districtName: String,
+    state: String,
+    info: String,
+    images: [String],
+});
+const districtModel = mongoose.model("districts", DistrictSchema);
+
+export { userModel, districtModel };
