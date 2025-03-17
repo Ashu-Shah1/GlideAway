@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState,useEffect} from 'react';
 import axios from 'axios';
 import '../auth.css';
 import { useNavigate } from 'react-router-dom';
 
 export default function AuthenticationComponent() {
+    const imageUrl = "src/assets/img/Kuari pass 4.jpg"; 
     const [isSignUp, setIsSignUp] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -22,6 +23,15 @@ export default function AuthenticationComponent() {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
+    const preloadImage = (url) => {
+        const img = new Image();
+        img.src = url;
+    };
+      
+      useEffect(() => {
+        preloadImage(imageUrl);
+      }, []);
+      
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -52,7 +62,7 @@ export default function AuthenticationComponent() {
         <div className="page-container">
             <div className="auth-card">
                 <div className="split-left">
-                    <img src="src/assets/img/Kuari pass 4.jpg" alt="Authentication" />
+                    <img src={imageUrl} alt="Authentication"  />
                     <div className="overlay"></div>
                 </div>
 
