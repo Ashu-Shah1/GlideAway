@@ -9,7 +9,6 @@ const districts = [
 ];
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showDestinations, setShowDestinations] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -67,7 +66,7 @@ const Navbar = () => {
                       {districts.slice(colIndex * 3, colIndex * 3 + 3).map((district) => (
                         <a
                           key={district}
-                          href={`/destination/${district.toLowerCase()}`}
+                          href={`/destination/${district}`}
                           className="text-white hover:text-blue-300 px-3 py-2 rounded-md transition-colors block bg-black/30"
                         >
                           {district}
@@ -80,7 +79,7 @@ const Navbar = () => {
                     {districts.slice(9).map((district) => (
                       <a
                         key={district}
-                        href={`/destination/${district.toLowerCase()}`}
+                        href={`/destination/${district}`}
                         className="text-white hover:text-blue-300 px-3 py-2 rounded-md transition-colors block bg-black/30"
                       >
                         {district}
