@@ -2,8 +2,7 @@ import express from 'express';
 import mongoose  from 'mongoose';
 import { config } from 'dotenv';
 config();
-import userRouter from './Routes/user.js';
-import districtRouter from './Routes/district.js';
+import userRouter from './Routes/user.js'
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
 
@@ -13,7 +12,7 @@ app.use(cookieParser())
 app.use(cors())
 
 app.use("/auth",userRouter)
-app.use("/district", districtRouter);
+app.use("/destination",userRouter)
 
 async function main(){
     try {
