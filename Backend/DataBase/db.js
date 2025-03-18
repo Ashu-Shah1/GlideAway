@@ -12,6 +12,9 @@ const DistrictSchema = new Schema({
     state: String,
     info: String,
     images: [String],
+    keyAttractions: [{ type: String }],
+    localCulture: { type: String },
+
 });
 
 const districtModel = mongoose.model("districts", DistrictSchema);

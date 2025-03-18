@@ -16,10 +16,7 @@ app.use("/destination",userRouter)
 
 async function main(){
     try {
-        await mongoose.connect(process.env.DB_CONNECTION_STRING, {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        });
+        await mongoose.connect(process.env.DB_CONNECTION_STRING);
         console.log("Connected to MongoDB");
     
         const PORT = process.env.PORT || 5000;
