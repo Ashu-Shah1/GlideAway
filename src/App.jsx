@@ -12,6 +12,7 @@ import { PopularDestinations } from './components/PopularDestinations';
 import TransportOptions from './components/TransportOptions';
 import Activities from './components/Activities'; 
 import InteractiveMap from './components/InteractiveMap';
+import VideoSection from './components/VideoSection';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -39,9 +40,19 @@ const App = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/home" element={
           <Layout>
+            <div className='mb-12'>
             <DestinationSearch />
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-6 ">
             <WeatherUpdate />
             <InteractiveMap />
+            </div>
+
+            <div className='mt-16'>
+            <VideoSection />
+            </div>
+            
             <TransportOptions />
             <PopularDestinations />
             <Activities />
