@@ -6,7 +6,6 @@ const VideoSection = () => {
       <h2 className="text-xl font-semibold text-white mb-3 text-center">Explore More</h2>
       <video
         className="w-full h-80 rounded-lg object-cover"
-        controls
         autoPlay
         muted
         loop
