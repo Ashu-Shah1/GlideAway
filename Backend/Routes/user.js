@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 const userRouter = Router()
-import userModel from '../DataBase/db.js'
+import {userModel,districtModel} from '../DataBase/db.js'
 import bcrypt from 'bcrypt'
 import z from 'zod'
 
@@ -19,7 +19,6 @@ const signUpSchema = userInfoSchema.extend({
 
 userRouter.post('/signUp',async function(req,res){
     try{
-        console.log(req.body)
         const validatedData = signUpSchema.parse(req.body)
 
         const {name,email,password} = validatedData
@@ -31,7 +30,6 @@ userRouter.post('/signUp',async function(req,res){
             email,
             password: hashPassword
         })
-        console.log(newUser)
         res.status(200).json({msg :"user is signed up successfully"})
 
     }catch (error) {
@@ -86,4 +84,16 @@ userRouter.post('/signIn', async function(req, res) {
     }
 });
 
+userRouter.get('/:districtName',async function(req,res){
+    try {
+        const districtName = req.params.districtName
+        const destination = await districtModel.findOne({ districtName: districtName});
+        if (!destination) {
+          return res.status(404).json({ message: 'Destination not found' });
+        }
+        res.json(destination);
+      } catch (error) {
+        res.status(500).json({ message: 'Error fetching destination', error });
+      }    
+})
 export default userRouter

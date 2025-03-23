@@ -6,14 +6,18 @@ const UserSchema = new Schema({
     password:String,
     email: {type:String , unique:true},
 })
-const userModel = mongoose.model('users',UserSchema)
 
 const DistrictSchema = new Schema({
     districtName: String,
     state: String,
     info: String,
     images: [String],
-});
-const districtModel = mongoose.model("districts", DistrictSchema);
+    keyAttractions: [{ type: String }],
+    localCulture: { type: String },
 
-export { userModel, districtModel };
+});
+
+const districtModel = mongoose.model("districts", DistrictSchema);
+const userModel = mongoose.model('users',UserSchema)
+
+export {userModel,districtModel}

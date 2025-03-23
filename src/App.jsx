@@ -13,17 +13,20 @@ import TransportOptions from './components/TransportOptions';
 import Activities from './components/Activities'; 
 import InteractiveMap from './components/InteractiveMap';
 import VideoSection from './components/VideoSection';
+import StateInfo from './components/StatesInfo';
 
 const Layout = ({ children }) => {
   const location = useLocation();
   
   // Hide header and navbar on /auth page
   const hideHeaderAndNavbar = location.pathname === "/auth";
+  // Hide header on /community-post and /destination/:district pages
+  const hideHeader = location.pathname === "/community-post" || location.pathname.startsWith("/destination/");
 
   return (
     <div>
       {!hideHeaderAndNavbar && <Navbar />}
-      {!hideHeaderAndNavbar && <Header />}
+      {!hideHeaderAndNavbar && !hideHeader && <Header />} {/* Hide header on /community-post and /destination/:district */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {children}
       </main>
@@ -36,8 +39,16 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/home" />} /> {/* This redirects / to /home */}
+        <Route path="/" element={<Navigate to="/home" />} /> 
         <Route path="/auth" element={<Auth />} />
+        <Route 
+          path="/destination/:district" 
+          element={
+            <Layout>
+              <StateInfo />
+            </Layout>
+          } 
+        />
         <Route path="/home" element={
           <Layout>
             <div className='mb-12'>
