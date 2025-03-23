@@ -5,13 +5,27 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css"; // For scroll animations
-import { FaMapMarkerAlt, FaSun, FaMountain, FaHiking, FaRoad, FaClock } from "react-icons/fa"; // Import icons from React Icons
+import {
+  FaMapMarkerAlt,
+  FaSun,
+  FaMountain,
+  FaHiking,
+  FaRoad,
+  FaClock,
+  FaTemperatureHigh,
+  FaTint,
+  FaWind,
+  FaCloudSun,
+  FaSpinner,
+} from "react-icons/fa"; // Import icons from React Icons
 
 const StateInfo = () => {
   const { district } = useParams();
   const [stateInfo, setStateInfo] = useState(null);
   const [loading, setIsLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [weather, setWeather] = useState(null); // State for weather data
+  const [weatherLoading, setWeatherLoading] = useState(true); // State for weather loading
 
   // Initialize AOS (Animate On Scroll)
   useEffect(() => {
@@ -33,6 +47,48 @@ const StateInfo = () => {
     }
     fetchStateInfo();
   }, [district]);
+
+  // Fetch weather data from Weatherstack API
+  useEffect(() => {
+    if (stateInfo) {
+      const apiKey = "294475ec7d9070fee1bf6cf458ce0cea"; // Replace with your Weatherstack API key
+      const cityName = stateInfo.districtName; // Use district name as the city name
+      const weatherUrl = `http://api.weatherstack.com/current?access_key=${apiKey}&query=${cityName}`;
+
+      setWeatherLoading(true); // Start loading
+      axios
+        .get(weatherUrl)
+        .then((response) => {
+          const weatherData = response.data;
+
+          // Extract required fields from the Weatherstack response
+          const weather = {
+            main: {
+              temp: weatherData.current.temperature,
+              feels_like: weatherData.current.feelslike,
+              humidity: weatherData.current.humidity,
+              pressure: weatherData.current.pressure, // Added pressure
+            },
+            wind: {
+              speed: weatherData.current.wind_speed,
+            },
+            weather: [
+              {
+                description: weatherData.current.weather_descriptions[0],
+              },
+            ],
+            current: weatherData.current, // Include the entire current object
+          };
+
+          setWeather(weather); // Set weather state
+          setWeatherLoading(false); // Stop loading
+        })
+        .catch((error) => {
+          console.error("Error fetching weather data:", error);
+          setWeatherLoading(false); // Stop loading even if there's an error
+        });
+    }
+  }, [stateInfo]);
 
   // Preload images once stateInfo is available
   useEffect(() => {
@@ -61,6 +117,20 @@ const StateInfo = () => {
       setCurrentImageIndex(currentImageIndex + 1);
     } else {
       console.error('All images failed to load');
+    }
+  };
+
+  // Function to get gradient based on weather condition
+  const getWeatherGradient = (weatherDescription) => {
+    switch (weatherDescription.toLowerCase()) {
+      case "clear":
+        return "from-yellow-400 to-orange-500"; // Sunny
+      case "cloudy":
+        return "from-gray-400 to-gray-600"; // Cloudy
+      case "rain":
+        return "from-blue-400 to-indigo-600"; // Rainy
+      default:
+        return "from-blue-500 to-purple-600"; // Default
     }
   };
 
@@ -192,11 +262,117 @@ const StateInfo = () => {
           className="w-full h-96 object-cover rounded-xl shadow-lg"
         />
 
-        {/* Travel Tips */}
+        {/* Weather Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
+          className={`bg-gradient-to-br ${getWeatherGradient(weather?.weather[0]?.description || "default")} rounded-xl p-6 shadow-lg text-white`}
+        >
+          <h2 className="text-2xl font-semibold mb-4 flex items-center">
+            <FaCloudSun className="mr-2" /> Weather in {stateInfo.districtName}
+          </h2>
+          {weatherLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <FaSpinner className="animate-spin text-2xl" />
+            </div>
+          ) : (
+            weather && (
+              <div className="space-y-4">
+                {/* Current Weather */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="flex items-center justify-between"
+                >
+                  <p className="text-4xl font-bold">{weather.main.temp}°C</p>
+                  <p className="text-lg capitalize">{weather.weather[0].description}</p>
+                </motion.div>
+
+                {/* Weather Details Grid */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  className="grid grid-cols-2 gap-4"
+                >
+                  {/* Feels Like */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white bg-opacity-10 p-4 rounded-lg"
+                  >
+                    <div className="flex items-center">
+                      <FaTemperatureHigh className="mr-2" />
+                      <p>Feels like {weather.main.feels_like}°C</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Humidity */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white bg-opacity-10 p-4 rounded-lg"
+                  >
+                    <div className="flex items-center">
+                      <FaTint className="mr-2" />
+                      <p>Humidity: {weather.main.humidity}%</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Wind Speed */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white bg-opacity-10 p-4 rounded-lg"
+                  >
+                    <div className="flex items-center">
+                      <FaWind className="mr-2" />
+                      <p>Wind: {weather.wind.speed} m/s</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Pressure */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white bg-opacity-10 p-4 rounded-lg"
+                  >
+                    <div className="flex items-center">
+                      <FaSun className="mr-2" />
+                      <p>Pressure: {weather.main.pressure} hPa</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Sunrise */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white bg-opacity-10 p-4 rounded-lg"
+                  >
+                    <div className="flex items-center">
+                      <FaSun className="mr-2" />
+                      <p>Sunrise: {weather.current?.astro?.sunrise || "N/A"}</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Sunset */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white bg-opacity-10 p-4 rounded-lg"
+                  >
+                    <div className="flex items-center">
+                      <FaSun className="mr-2" />
+                      <p>Sunset: {weather.current?.astro?.sunset || "N/A"}</p>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              </div>
+            )
+          )}
+        </motion.div>
+
+        {/* Travel Tips */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
           className="bg-white rounded-xl p-6 shadow-lg"
         >
           <h2 className="text-2xl font-semibold mb-4">✈️ Travel Tips</h2>
@@ -212,7 +388,7 @@ const StateInfo = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
           className="bg-white rounded-xl p-6 shadow-lg"
         >
           <h2 className="text-2xl font-semibold mb-4">🚗 How to Reach</h2>
