@@ -14,6 +14,7 @@ import Activities from './components/Activities';
 import InteractiveMap from './components/InteractiveMap';
 import VideoSection from './components/VideoSection';
 import StateInfo from './components/StatesInfo';
+import AiFeature from './components/AiFeature';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -56,8 +57,8 @@ const App = () => {
             </div>
             
             <div className="flex flex-col md:flex-row gap-6 ">
-            <WeatherUpdate />
-            <InteractiveMap />
+            <AiFeature />
+            {/* <InteractiveMap /> */}
             </div>
 
             <div className='mt-16'>
@@ -68,6 +69,8 @@ const App = () => {
             <PopularDestinations />
             <Activities />
             <TravelCommunity />
+
+            <InteractiveMap/>
           </Layout>
         } />
         <Route path="/community-post" element={

@@ -10,9 +10,8 @@ const DestinationSearch = () => {
     <div className="bg-white rounded-xl shadow-xl p-6 -mt-24 relative z-10 mx-4 lg:mx-auto max-w-5xl">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        {/* Destination Input */}
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+          <label className="block text-m font-bold text-gray-700 mb-1">Destination</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
@@ -26,9 +25,8 @@ const DestinationSearch = () => {
           </div>
         </div>
 
-        {/* Date Picker */}
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Dates</label>
+          <label className="block text-m font-bold text-gray-700 mb-1">Dates</label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
@@ -41,9 +39,9 @@ const DestinationSearch = () => {
           </div>
         </div>
 
-        {/* Travelers Dropdown */}
+
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Travelers</label>
+          <label className="block text-m font-bold text-gray-700 mb-1">Travelers</label>
           <div className="relative">
             <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <select
@@ -62,7 +60,6 @@ const DestinationSearch = () => {
 
       </div>
 
-      {/* Search Button */}
       <div className="mt-6 text-center">
         <button
           className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"

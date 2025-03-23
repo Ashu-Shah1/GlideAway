@@ -30,9 +30,9 @@ const InteractiveMap = () => {
   }, []);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 h-[450px] w-full md:w-1/2">
+    <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-screen-lg mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-center">Interactive Map</h2>
-      <div id="map" className="w-full h-[350px] rounded-lg overflow-hidden"></div>
+      <div id="map" className="w-full h-[300px] rounded-lg overflow-hidden"></div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose  from 'mongoose';
-import { config } from 'dotenv';
-config();
+import dotenv from 'dotenv';
+dotenv.config({path:'frontend/Backend/.env'});
 import userRouter from './Routes/user.js'
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
@@ -16,10 +16,10 @@ app.use("/destination",userRouter)
 
 async function main(){
     try {
-        await mongoose.connect(process.env.DB_CONNECTION_STRING);
+        await mongoose.connect("mongodb+srv://gauravsinghnegi54:DONjii@cluster0.notds.mongodb.net/GlideAway-Web");
         console.log("Connected to MongoDB");
     
-        const PORT = process.env.PORT || 5000;
+        const PORT = 3000;
         app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
       } catch (err) {
         console.error("MongoDB connection error:", err);
