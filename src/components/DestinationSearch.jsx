@@ -1,10 +1,20 @@
 import { useState } from "react";
 import { Search, Calendar, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const DestinationSearch = () => {
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
   const [travelers, setTravelers] = useState("");
+  const navigate = useNavigate()
+
+  function handelSearch(){
+    if (destination) {
+      navigate(`/destination/${destination}`); // ✅ Correct way to navigate
+    } else {
+      alert("Please enter a destination.");
+    }
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 -mt-24 relative z-10 mx-4 lg:mx-auto max-w-5xl">
@@ -63,6 +73,7 @@ const DestinationSearch = () => {
       <div className="mt-6 text-center">
         <button
           className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
+          onClick={handelSearch}
         >
           Search
         </button>
