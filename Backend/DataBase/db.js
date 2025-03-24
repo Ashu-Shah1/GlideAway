@@ -16,8 +16,21 @@ const DistrictSchema = new Schema({
     localCulture: { type: String },
 
 });
+const BlogSchema = new Schema({
+    title: String,
+    content: String,
+    category: String,
+    imageUrl: String,
+    authorName: String,
+    authorAvatar: String,
+    likes: Number,
+    comments: Number,
+    createdAt: { type: Date, default: Date.now }
+  });
+  
+const blogModel = mongoose.model("blogs", BlogSchema);
 
 const districtModel = mongoose.model("districts", DistrictSchema);
 const userModel = mongoose.model('users',UserSchema)
 
-export {userModel,districtModel}
+export {userModel,districtModel,blogModel}
