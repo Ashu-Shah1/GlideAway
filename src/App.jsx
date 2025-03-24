@@ -16,19 +16,19 @@ import VideoSection from './components/VideoSection';
 import StateInfo from './components/StatesInfo';
 import AiFeature from './components/AiFeature';
 
-const Layout = ({ children }) => {
+const Layout = ({ children, hideHeader = false }) => {
   const location = useLocation();
   
   // Hide header and navbar on /auth page
   const hideHeaderAndNavbar = location.pathname === "/auth";
-  // Hide header on /community-post and /destination/:district pages
-  const hideHeader = location.pathname === "/community-post" || location.pathname.startsWith("/destination/");
+  // Hide header based on prop or specific routes
+  const shouldHideHeader = hideHeader || location.pathname === "/community-post" || location.pathname.startsWith("/destination/");
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       {!hideHeaderAndNavbar && <Navbar />}
-      {!hideHeaderAndNavbar && !hideHeader && <Header />} {/* Hide header on /community-post and /destination/:district */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {!hideHeaderAndNavbar && !shouldHideHeader && <Header />}
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {children}
       </main>
       {!hideHeaderAndNavbar && <Footer />}
@@ -40,7 +40,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/home" />} /> 
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/auth" element={<Auth />} />
         <Route 
           path="/destination/:district" 
@@ -53,34 +53,31 @@ const App = () => {
         <Route path="/home" element={
           <Layout>
             <div className='mb-12'>
-            <DestinationSearch />
+              <DestinationSearch />
             </div>
-            
-            {/* <div className="flex flex-col md:flex-row gap-6 ">
-            
-            </div> */}
-
             <div className='mt-16'>
-            <VideoSection />
+              <VideoSection />
             </div>
-            
             <TransportOptions />
             <PopularDestinations />
             <Activities />
             <TravelCommunity />
-
-            <AiFeature />
-
             <div className='mt-16'>
-            <InteractiveMap/>
+              <InteractiveMap />
             </div>
-            
           </Layout>
         } />
         <Route path="/community-post" element={
           <Layout>
             <CommunityPostPage />
           </Layout>
+        } />
+        <Route path="/aiFeature" element={
+          <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+            <Layout hideHeader={true}>
+              <AiFeature />
+            </Layout>
+          </div>
         } />
       </Routes>
     </Router>
