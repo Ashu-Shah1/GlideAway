@@ -6,7 +6,6 @@ import userRouter from './Routes/user.js'
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
 
-console.log(process.env.JWT_USER_SECRET)
 const app = express()
 app.use(express.json())
 app.use(cookieParser())

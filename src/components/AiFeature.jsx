@@ -54,9 +54,9 @@ const AiFeature = () => {
               className="lg:pl-8"
             >
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Experience Travel Planning, {" "}
+               Enhance Travel Experience {" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-blue-500">
-                  Reimagined with AI
+                  with AI
                 </span>
               </h2>
               <p className="text-xl text-gray-600 mb-8">

@@ -51,8 +51,7 @@ const StateInfo = () => {
   // Fetch weather data from Weatherstack API
   useEffect(() => {
     if (stateInfo) {
-      const apiKey = import.meta.env.VITE_WeatherApiKey;
-      console.log(import.meta.env) // Replace with your Weatherstack API key
+      const apiKey = import.meta.env.VITE_WeatherApiKey;// Replace with your Weatherstack API key
       const cityName = stateInfo.districtName; // Use district name as the city name
       const weatherUrl = `http://api.weatherstack.com/current?access_key=${apiKey}&query=${cityName}`;
 

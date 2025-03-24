@@ -56,10 +56,9 @@ const App = () => {
             <DestinationSearch />
             </div>
             
-            <div className="flex flex-col md:flex-row gap-6 ">
-            <AiFeature />
-            {/* <InteractiveMap /> */}
-            </div>
+            {/* <div className="flex flex-col md:flex-row gap-6 ">
+            
+            </div> */}
 
             <div className='mt-16'>
             <VideoSection />
@@ -70,7 +69,12 @@ const App = () => {
             <Activities />
             <TravelCommunity />
 
+            <AiFeature />
+
+            <div className='mt-16'>
             <InteractiveMap/>
+            </div>
+            
           </Layout>
         } />
         <Route path="/community-post" element={
