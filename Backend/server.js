@@ -3,6 +3,7 @@ import mongoose  from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 import userRouter from './Routes/user.js'
+import CommunityRouter from './Routes/community.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
 
@@ -13,6 +14,7 @@ app.use(cors())
 
 app.use("/auth",userRouter)
 app.use("/destination",userRouter)
+app.use("/community-post",CommunityRouter)
 
 async function main(){
     try {
