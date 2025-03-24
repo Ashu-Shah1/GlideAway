@@ -10,7 +10,7 @@ const DestinationSearch = () => {
 
   function handelSearch(){
     if (destination) {
-      navigate(`/destination/${destination}`); // ✅ Correct way to navigate
+      navigate(`/destination/${destination}`); 
     } else {
       alert("Please enter a destination.");
     }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Users, MessageSquare, Heart, Share2, Trophy, MapPin, Mountain, Camera, Compass, PenTool, ChevronRight, X } from 'lucide-react';
 
 const CommunityPage = () => {
@@ -42,15 +43,24 @@ const CommunityPage = () => {
 
   useEffect(() => {
     fetchBlogs();
-  }, [selectedCategory]);
+  }, []);
 
   const fetchBlogs = async () => {
     try {
-      const response = await fetch('/api/blogs');
-      const data = await response.json();
-      setBlogs(data);
+      const response = await axios.get('http://localhost:3000/community-post/allBlogs');
+      setBlogs(response.data);
     } catch (error) {
-      console.error('Error fetching blogs:', error);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        console.error('Server responded with error status:', error.response.status);
+        console.error('Error data:', error.response.data);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received:', error.request);
+      } else {
+        // Something happened in setting up the request
+        console.error('Request setup error:', error.message);
+      }
     }
   };
 
