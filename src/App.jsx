@@ -15,6 +15,7 @@ import InteractiveMap from './components/InteractiveMap';
 import VideoSection from './components/VideoSection';
 import StateInfo from './components/StatesInfo';
 import AiFeature from './components/AiFeature';
+import Treks from './components/Treks';
 
 const Layout = ({ children, hideHeader = false }) => {
   const location = useLocation();
@@ -42,6 +43,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/activities" element={<Activities />} />
         <Route 
           path="/destination/:district" 
           element={
@@ -76,6 +78,13 @@ const App = () => {
           <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
             <Layout hideHeader={true}>
               <AiFeature />
+            </Layout>
+          </div>
+        } />
+        <Route path="/trek" element={
+          <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+            <Layout hideHeader={true}>
+              <Treks />
             </Layout>
           </div>
         } />

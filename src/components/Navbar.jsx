@@ -90,7 +90,13 @@ const Navbar = () => {
               </div>
             </div>
 
-            <a href="#" className="text-gray-700 hover:text-blue-600">Activities</a>
+            <button 
+            onClick={() => navigate("/activities")} 
+            className="text-gray-700 hover:text-blue-600"
+             >
+            Activities
+            </button>
+
             <a href="#" className="text-gray-700 hover:text-blue-600">Hotels</a>
             <button
               onClick={() => navigate("/community-post")}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mountain, Waves, Compass } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const activities = [
   {
@@ -10,7 +11,7 @@ const activities = [
   },
   {
     id: 2,
-    name: 'River Rafting',
+    name: 'Adventure Spots',
     icon: Waves,
     description: 'Experience thrilling water adventures',
   },
@@ -23,6 +24,11 @@ const activities = [
 ];
 
 const Activities = () => {
+
+  const navigate = useNavigate()
+  function handelTrek(){
+    navigate('/trek')
+  }
   return (
     <section className="py-10 px-6">
       <h2 className="text-3xl font-bold mb-8 text-center">Things To Do</h2>
@@ -39,7 +45,7 @@ const Activities = () => {
               </div>
               <h3 className="text-xl font-semibold mb-2">{activity.name}</h3>
               <p className="text-gray-600">{activity.description}</p>
-              <button className="mt-4 text-blue-600 font-medium hover:text-blue-700">
+              <button className="mt-4 text-blue-600 font-medium hover:text-blue-700" onClick={handelTrek}>
                 Learn more →
               </button>
             </div>
