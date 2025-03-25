@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 const userRouter = Router()
-import {userModel,districtModel} from '../DataBase/db.js'
+import {userModel,districtModel,blogModel} from '../DataBase/db.js'
 import bcrypt from 'bcrypt'
 import z from 'zod'
 
@@ -95,5 +95,14 @@ userRouter.get('/:districtName',async function(req,res){
       } catch (error) {
         res.status(500).json({ message: 'Error fetching destination', error });
       }    
+})
+userRouter.get('/allBlogs',async (req,res) => {
+    try {
+        const blogs = await blogModel.find({}); 
+        res.json(blogs);
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
 })
 export default userRouter

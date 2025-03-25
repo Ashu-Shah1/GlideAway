@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion } from "framer-motion";
 import AOS from "aos";
-import "aos/dist/aos.css"; // For scroll animations
+import "aos/dist/aos.css";
 import {
   FaMapMarkerAlt,
   FaSun,
@@ -17,29 +17,28 @@ import {
   FaWind,
   FaCloudSun,
   FaSpinner,
-} from "react-icons/fa"; // Import icons from React Icons
+} from "react-icons/fa";
 
 const StateInfo = () => {
   const { district } = useParams();
   const [stateInfo, setStateInfo] = useState(null);
   const [loading, setIsLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [weather, setWeather] = useState(null); // State for weather data
-  const [weatherLoading, setWeatherLoading] = useState(true); // State for weather loading
+  const [weather, setWeather] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(true);
 
-  // Initialize AOS (Animate On Scroll)
+  // Initialize AOS
   useEffect(() => {
     AOS.init({ duration: 2000 });
   }, []);
 
-  // Fetch state info from the database
+  // Fetch state info
   useEffect(() => {
     async function fetchStateInfo() {
       try {
         const response = await axios.get(
           `http://localhost:3000/destination/${district}`
         );
-        console.log(response.data);
         setStateInfo(response.data);
       } catch (error) {
         console.error("Error fetching destination info:", error);
@@ -48,49 +47,46 @@ const StateInfo = () => {
     fetchStateInfo();
   }, [district]);
 
-  // Fetch weather data from Weatherstack API
+  // Fetch weather data from WeatherAPI.com
   useEffect(() => {
     if (stateInfo) {
-      const apiKey = import.meta.env.VITE_WeatherApiKey;// Replace with your Weatherstack API key
-      const cityName = stateInfo.districtName; // Use district name as the city name
-      const weatherUrl = `http://api.weatherstack.com/current?access_key=${apiKey}&query=${cityName}`;
+      const apiKey = import.meta.env.VITE_WeatherApiKey;
+      const cityName = stateInfo.districtName;
+      const weatherUrl = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${cityName}`;
 
-      setWeatherLoading(true); // Start loading
+      setWeatherLoading(true);
       axios
         .get(weatherUrl)
         .then((response) => {
           const weatherData = response.data;
-          console.log(weatherData)
-          // Extract required fields from the Weatherstack response
           const weather = {
             main: {
-              temp: weatherData.current.temperature,
-              feels_like: weatherData.current.feelslike,
+              temp: weatherData.current.temp_c,
+              feels_like: weatherData.current.feelslike_c,
               humidity: weatherData.current.humidity,
-              pressure: weatherData.current.pressure, // Added pressure
+              pressure: weatherData.current.pressure_mb,
             },
             wind: {
-              speed: weatherData.current.wind_speed,
+              speed: weatherData.current.wind_kph,
             },
             weather: [
               {
-                description: weatherData.current.weather_descriptions[0],
+                description: weatherData.current.condition.text,
+                icon: weatherData.current.condition.icon,
               },
             ],
-            current: weatherData.current, // Include the entire current object
           };
-
-          setWeather(weather); // Set weather state
-          setWeatherLoading(false); // Stop loading
+          setWeather(weather);
         })
         .catch((error) => {
-          console.error("Error fetching weather data:", error);
-          setWeatherLoading(false); // Stop loading even if there's an error
-        });
+          console.error("WeatherAPI Error:", error);
+          setWeather(null);
+        })
+        .finally(() => setWeatherLoading(false));
     }
   }, [stateInfo]);
 
-  // Preload images once stateInfo is available
+  // Preload images
   useEffect(() => {
     if (stateInfo && stateInfo.images) {
       const preloadImages = stateInfo.images.map((src) => {
@@ -99,7 +95,6 @@ const StateInfo = () => {
         return img;
       });
 
-      // Check if all images are loaded
       Promise.all(
         preloadImages.map(
           (img) =>
@@ -111,26 +106,11 @@ const StateInfo = () => {
     }
   }, [stateInfo]);
 
-  // Handle image loading errors
   const handleImageError = () => {
     if (currentImageIndex < stateInfo.images.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);
     } else {
-      console.error('All images failed to load');
-    }
-  };
-
-  // Function to get gradient based on weather condition
-  const getWeatherGradient = (weatherDescription) => {
-    switch (weatherDescription.toLowerCase()) {
-      case "clear":
-        return "from-yellow-400 to-orange-500"; // Sunny
-      case "cloudy":
-        return "from-gray-400 to-gray-600"; // Cloudy
-      case "rain":
-        return "from-blue-400 to-indigo-600"; // Rainy
-      default:
-        return "from-blue-500 to-purple-600"; // Default
+      console.error("All images failed to load");
     }
   };
 
@@ -152,7 +132,6 @@ const StateInfo = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 font-poppins">
       {/* Left Column */}
       <div className="space-y-6">
-        {/* District Name */}
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -162,7 +141,6 @@ const StateInfo = () => {
           {stateInfo.districtName}
         </motion.h1>
 
-        {/* District Info */}
         <motion.p
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -172,7 +150,6 @@ const StateInfo = () => {
           {stateInfo.info}
         </motion.p>
 
-        {/* Key Attractions */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -190,7 +167,6 @@ const StateInfo = () => {
           </ul>
         </motion.div>
 
-        {/* Local Culture */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -201,7 +177,6 @@ const StateInfo = () => {
           <p className="text-gray-600">{stateInfo.localCulture}</p>
         </motion.div>
 
-        {/* Popular Treks */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -219,27 +194,27 @@ const StateInfo = () => {
                 <h3 className="text-xl font-semibold">{trek.trekName}</h3>
                 <div className="text-gray-600 space-y-2">
                   <p className="flex items-center">
-                    <FaMapMarkerAlt className="mr-2 text-blue-500" /> {/* Location Icon */}
+                    <FaMapMarkerAlt className="mr-2 text-blue-500" />
                     {trek.location}
                   </p>
                   <p className="flex items-center">
-                    <FaSun className="mr-2 text-yellow-500" /> {/* Best Season Icon */}
+                    <FaSun className="mr-2 text-yellow-500" />
                     {trek.bestSeason}
                   </p>
                   <p className="flex items-center">
-                    <FaHiking className="mr-2 text-green-500" /> {/* Difficulty Level Icon */}
+                    <FaHiking className="mr-2 text-green-500" />
                     {trek.difficultyLevel}
                   </p>
                   <p className="flex items-center">
-                    <FaRoad className="mr-2 text-gray-500" /> {/* Distance Icon */}
+                    <FaRoad className="mr-2 text-gray-500" />
                     {trek.distance} km
                   </p>
                   <p className="flex items-center">
-                    <FaMountain className="mr-2 text-brown-500" /> {/* Altitude Icon */}
+                    <FaMountain className="mr-2 text-brown-500" />
                     {trek.altitude} meters
                   </p>
                   <p className="flex items-center">
-                    <FaClock className="mr-2 text-purple-500" /> {/* Trek Duration Icon */}
+                    <FaClock className="mr-2 text-purple-500" />
                     {trek.trekDuration}
                   </p>
                 </div>
@@ -251,7 +226,6 @@ const StateInfo = () => {
 
       {/* Right Column */}
       <div className="space-y-6">
-        {/* Image */}
         <motion.img
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -263,112 +237,105 @@ const StateInfo = () => {
         />
 
         {/* Weather Section */}
+        {/* Weather Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className={`bg-gradient-to-br ${getWeatherGradient(weather?.weather[0]?.description || "default")} rounded-xl p-6 shadow-lg text-white`}
+          className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-lg text-white"
         >
           <h2 className="text-2xl font-semibold mb-4 flex items-center">
-            <FaCloudSun className="mr-2" /> Weather in {stateInfo.districtName}
+            <FaCloudSun className="mr-2 text-blue-100" /> Weather in{" "}
+            {stateInfo.districtName}
           </h2>
+
           {weatherLoading ? (
             <div className="flex items-center justify-center h-32">
-              <FaSpinner className="animate-spin text-2xl" />
+              <FaSpinner className="animate-spin text-2xl text-blue-100" />
+            </div>
+          ) : weather ? (
+            <div className="space-y-4">
+              {/* Current Weather with Icon */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center">
+                  <img
+                    src={`https:${weather.weather[0].icon}`}
+                    alt={weather.weather[0].description}
+                    className="w-16 h-16"
+                  />
+                  <p className="text-4xl font-bold ml-2">
+                    {weather.main.temp}°C
+                  </p>
+                </div>
+                <p className="text-lg capitalize text-blue-100">
+                  {weather.weather[0].description}
+                </p>
+              </motion.div>
+
+              {/* Weather Details Grid - 2x2 layout */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="grid grid-cols-2 gap-4"
+              >
+                {/* Feels Like */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-blue-400 bg-opacity-20 p-4 rounded-lg backdrop-blur-sm"
+                >
+                  <div className="flex items-center">
+                    <FaTemperatureHigh className="mr-2 text-blue-100" />
+                    <p>Feels like {weather.main.feels_like}°C</p>
+                  </div>
+                </motion.div>
+
+                {/* Humidity */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-blue-400 bg-opacity-20 p-4 rounded-lg backdrop-blur-sm"
+                >
+                  <div className="flex items-center">
+                    <FaTint className="mr-2 text-blue-100" />
+                    <p>Humidity: {weather.main.humidity}%</p>
+                  </div>
+                </motion.div>
+
+                {/* Wind Speed */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-blue-400 bg-opacity-20 p-4 rounded-lg backdrop-blur-sm"
+                >
+                  <div className="flex items-center">
+                    <FaWind className="mr-2 text-blue-100" />
+                    <p>Wind: {weather.wind.speed} km/h</p>
+                  </div>
+                </motion.div>
+
+                {/* Pressure */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-blue-400 bg-opacity-20 p-4 rounded-lg backdrop-blur-sm"
+                >
+                  <div className="flex items-center">
+                    <FaSun className="mr-2 text-blue-100" />
+                    <p>Pressure: {weather.main.pressure} mb</p>
+                  </div>
+                </motion.div>
+              </motion.div>
             </div>
           ) : (
-            weather && (
-              <div className="space-y-4">
-                {/* Current Weather */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="flex items-center justify-between"
-                >
-                  <p className="text-4xl font-bold">{weather.main.temp}°C</p>
-                  <p className="text-lg capitalize">{weather.weather[0].description}</p>
-                </motion.div>
-
-                {/* Weather Details Grid */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="grid grid-cols-2 gap-4"
-                >
-                  {/* Feels Like */}
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-white bg-opacity-10 p-4 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <FaTemperatureHigh className="mr-2" />
-                      <p>Feels like {weather.main.feels_like}°C</p>
-                    </div>
-                  </motion.div>
-
-                  {/* Humidity */}
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-white bg-opacity-10 p-4 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <FaTint className="mr-2" />
-                      <p>Humidity: {weather.main.humidity}%</p>
-                    </div>
-                  </motion.div>
-
-                  {/* Wind Speed */}
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-white bg-opacity-10 p-4 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <FaWind className="mr-2" />
-                      <p>Wind: {weather.wind.speed} m/s</p>
-                    </div>
-                  </motion.div>
-
-                  {/* Pressure */}
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-white bg-opacity-10 p-4 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <FaSun className="mr-2" />
-                      <p>Pressure: {weather.main.pressure} hPa</p>
-                    </div>
-                  </motion.div>
-
-                  {/* Sunrise */}
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-white bg-opacity-10 p-4 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <FaSun className="mr-2" />
-                      <p>Sunrise: {weather.current?.astro?.sunrise || "N/A"}</p>
-                    </div>
-                  </motion.div>
-
-                  {/* Sunset */}
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-white bg-opacity-10 p-4 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <FaSun className="mr-2" />
-                      <p>Sunset: {weather.current?.astro?.sunset || "N/A"}</p>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              </div>
-            )
+            <div className="text-center py-8 text-blue-100">
+              Weather data not available
+            </div>
           )}
         </motion.div>
 
-        {/* Travel Tips */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -384,7 +351,6 @@ const StateInfo = () => {
           </ul>
         </motion.div>
 
-        {/* How to Reach */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

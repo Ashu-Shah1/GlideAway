@@ -32,8 +32,8 @@ const Navbar = () => {
         
           <div className="flex items-center">
             <MapPin className="h-8 w-8 text-blue-600" aria-label="Logo" />
-            <span className="ml-2 text-xl font-bold text-gray-900">
-              Uttarakhand Travel
+            <span className="ml-2 text-2xl font-bold text-gray-900">
+              GlideAway
             </span>
           </div>
 
