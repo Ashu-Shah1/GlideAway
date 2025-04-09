@@ -104,6 +104,13 @@ const Navbar = () => {
             >
               Community
             </button>
+
+            <button 
+            onClick={() => navigate("/AboutUs")} 
+            className="text-gray-700 hover:text-blue-600"
+             >
+            About Us
+            </button>
           </div>
 
           <div className="flex items-center space-x-4">
