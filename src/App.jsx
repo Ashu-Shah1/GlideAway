@@ -16,6 +16,7 @@ import VideoSection from './components/VideoSection';
 import StateInfo from './components/StatesInfo';
 import AiFeature from './components/AiFeature';
 import Treks from './components/Treks';
+import AboutUs from './components/AboutUs';
 
 const Layout = ({ children, hideHeader = false }) => {
   const location = useLocation();
@@ -23,7 +24,7 @@ const Layout = ({ children, hideHeader = false }) => {
   // Hide header and navbar on /auth page
   const hideHeaderAndNavbar = location.pathname === "/auth";
   // Hide header based on prop or specific routes
-  const shouldHideHeader = hideHeader || location.pathname === "/community-post" || location.pathname.startsWith("/destination/");
+  const shouldHideHeader = hideHeader || location.pathname === "/community-post" || location.pathname.startsWith("/destination/") || location.pathname === "/AboutUs";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -85,6 +86,13 @@ const App = () => {
           <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
             <Layout hideHeader={true}>
               <Treks />
+            </Layout>
+          </div>
+        } />
+        <Route path="/AboutUs" element={
+          <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+            <Layout hideHeader={true}>
+              <AboutUs />
             </Layout>
           </div>
         } />
