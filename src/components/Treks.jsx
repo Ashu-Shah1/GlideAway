@@ -9,7 +9,7 @@ const trekkingPlaces = [
     duration: "2-3 days",
     bestTime: "October to March",
     altitude: "9,910 ft",
-    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80",
+    image: "https://www.shikhar.com/images/gallery/tours/180/2031696398.jpg",
     description: "Perfect for beginners, offering panoramic views of major Himalayan peaks and dense oak forests.",
     category: "Easy to Moderate"
   },
@@ -53,7 +53,7 @@ const trekkingPlaces = [
     duration: "7-8 days",
     bestTime: "March to June, September to November",
     altitude: "11,675 ft",
-    image: "src/assets/treks/Har_ki_Dun.jpg",
+    image: "https://i0.wp.com/bnkhimalayan.com/wp-content/uploads/2022/09/IMG_3598a.jpg?fit=1501%2C1000&ssl=1",
     description: "Ancient village trek with stunning valley views and rich Himalayan culture.",
     category: "Easy to Moderate"
   },
@@ -76,7 +76,7 @@ const trekkingPlaces = [
     duration: "7-8 days",
     bestTime: "May to June, September to October",
     altitude: "16,499 ft",
-    image: "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&q=80",
+    image: "https://himalayanambition.in/wp-content/uploads/2023/10/BlogspotImageUrl44719-Bikat-Adventures.jpg",
     description: "Famous for its mysterious skeletal lake, requiring good fitness and offering challenging terrain.",
     category: "Moderate to Difficult"
   },
@@ -87,7 +87,7 @@ const trekkingPlaces = [
     duration: "7 days",
     bestTime: "May to June, September to October",
     altitude: "12,300 ft",
-    image: "https://images.unsplash.com/photo-1494783367193-149034c05e8f?auto=format&fit=crop&q=80",
+    image: "https://trekthehimalayas.com/images/PindariGlacierTrek/GalleryDesktop/Autumn/e6f7c2de-f5c2-46ea-84e2-fbb7c9385a20_Pindari-Glacier-6.webp",
     description: "Leads to the beautiful Pindari Glacier, perfect for adventure seekers with glacier views.",
     category: "Moderate to Difficult"
   },
@@ -98,7 +98,7 @@ const trekkingPlaces = [
     duration: "6-7 days",
     bestTime: "July to September",
     altitude: "12,654 ft",
-    image: "src/assets/treks/vally_of_flowers.jpg",
+    image: "https://t.eucdn.in/tourism/lg-jpg/valley-of-flowers-5353172.jpg",
     description: "A UNESCO World Heritage site, famous for its vibrant floral meadows and diverse flora.",
     category: "Moderate to Difficult"
   },
@@ -109,11 +109,11 @@ const trekkingPlaces = [
     duration: "6 days",
     bestTime: "March to June, September to November",
     altitude: "12,516 ft",
-    image: "https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80",
+    image: "src/assets/img/Kuari pass 2.jpg",
     description: "Offers breathtaking views of Nanda Devi and other prominent Himalayan peaks.",
     category: "Moderate to Difficult"
   },
-  // Challenging Treks
+  
   {
     name: "Rupin Pass Trek",
     location: "Uttarkashi",
@@ -121,7 +121,7 @@ const trekkingPlaces = [
     duration: "8 days",
     bestTime: "May to June, September to October",
     altitude: "15,250 ft",
-    image: "https://images.unsplash.com/photo-1485343034225-9e5b5cb88c6b?auto=format&fit=crop&q=80",
+    image: "http://www.365hops.com/searching_files/timthumb.php?src=http://www.365hops.com/social/event_gallery/1543494727.rupin-pass-trek-the-himalayas-(11).jpg&h=380&w=650&zc=1",
     description: "A thrilling trek featuring waterfalls, hanging villages, and snow bridges.",
     category: "Challenging"
   },
@@ -143,7 +143,7 @@ const trekkingPlaces = [
     duration: "10-12 days",
     bestTime: "May to October",
     altitude: "13,500 ft",
-    image: "https://images.unsplash.com/photo-1494783367193-149034c05e8f?auto=format&fit=crop&q=80",
+    image: "http://www.365hops.com/searching_files/timthumb.php?src=http://www.365hops.com/social/event_gallery/1444043672.milam(1).jpg&h=380&w=650&zc=1",
     description: "One of the longest treks, leading to the source of the Gori Ganga River.",
     category: "Challenging"
   },
@@ -154,7 +154,7 @@ const trekkingPlaces = [
     duration: "8-9 days",
     bestTime: "May to October",
     altitude: "13,975 ft",
-    image: "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&q=80",
+    image: "https://nagarjunatravels.com/images/packages/panchachuli-base-camp-darma-valley-tour-itinerary-ex-haldwanikathgodam-05-days-04-nights-66ee8c702aada.jpg",
     description: "A mesmerizing trek offering views of the five Panchachuli peaks.",
     category: "Challenging"
   },
@@ -165,7 +165,7 @@ const trekkingPlaces = [
     duration: "10-12 days",
     bestTime: "June to September",
     altitude: "13,780 ft",
-    image: "https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80",
+    image: "https://www.himalayanhikers.in/wp-content/uploads/2019/12/Nanda-Devi-Base-Camp-Trek4.jpg",
     description: "Takes you close to India's second-highest peak, Nanda Devi, offering challenging terrain and stunning views.",
     category: "Challenging"
   }

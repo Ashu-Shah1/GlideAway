@@ -4,7 +4,7 @@ const Header = () => {
 
   const navigate = useNavigate()
   function handelPlanTrip(){
-    navigate('/aiFeature')
+    navigate('/Feature')
   }
   return (
     <div className="relative h-[600px] bg-cover bg-center" style={{
@@ -19,9 +19,7 @@ const Header = () => {
             <button className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors" onClick={handelPlanTrip}>
               Plan Your Trip
             </button>
-            <button className="bg-white text-gray-900 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
-              Explore Destinations
-            </button>
+           
           </div>
         </div>
       </div>

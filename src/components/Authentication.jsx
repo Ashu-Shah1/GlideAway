@@ -69,7 +69,7 @@ export default function AuthenticationComponent() {
                 <div className="split-right">
                     <div className="auth-container">
                         <div className="auth-header">
-                            <h2>Uttarakhand Travels</h2>
+                            <h2>GlideAway</h2>
                             <h2>{isSignUp ? 'Create an Account' : 'Welcome back'}</h2>
                             <p id="switchText">
                                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
