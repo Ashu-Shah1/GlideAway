@@ -104,7 +104,12 @@ const districts = [
               Activities
             </button>
 
-            <a href="#" className="text-gray-700 hover:text-blue-600">Hotels</a>
+            <button
+              onClick={() => navigate("/Hotels")}
+              className="text-gray-700 hover:text-blue-600"
+            >
+              Hotels
+            </button>
 
             <button
               onClick={() => navigate("/community-post")}
