@@ -8,27 +8,27 @@ const activities = [
     name: 'Trekking',
     icon: Mountain,
     description: 'Explore scenic mountain trails',
+    path: '/trek',
   },
   {
     id: 2,
     name: 'Adventure Spots',
     icon: Waves,
     description: 'Experience thrilling water adventures',
+    path: '/adventure',
   },
   {
     id: 3,
     name: 'Spiritual Tours',
     icon: Compass,
     description: 'Visit ancient temples and ashrams',
+    path: '/spiritual',
   },
 ];
 
 const Activities = () => {
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
-  function handelTrek(){
-    navigate('/trek')
-  }
   return (
     <section className="py-10 px-6">
       <h2 className="text-3xl font-bold mb-8 text-center">Things To Do</h2>
@@ -45,7 +45,10 @@ const Activities = () => {
               </div>
               <h3 className="text-xl font-semibold mb-2">{activity.name}</h3>
               <p className="text-gray-600">{activity.description}</p>
-              <button className="mt-4 text-blue-600 font-medium hover:text-blue-700" onClick={handelTrek}>
+              <button 
+                className="mt-4 text-blue-600 font-medium hover:text-blue-700" 
+                onClick={() => navigate(activity.path)}
+              >
                 Learn more →
               </button>
             </div>

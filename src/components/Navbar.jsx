@@ -8,9 +8,18 @@ const districts = [
   "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"
 ];
 
-const Navbar = () => {
+  const Navbar = ({ activitiesRef }) => {
+    const navigate = useNavigate();
+  
+    const handleActivitiesClick = () => {
+      navigate("/home");
+      setTimeout(() => {
+        activitiesRef?.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100); // wait a bit to let homepage load
+    };
+  
+
   const [showDestinations, setShowDestinations] = useState(false);
-  const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -40,8 +49,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8">
             <button 
               onClick={() => navigate("/")}
-              className="text-gray-700 hover:text-blue-600"
-            >
+              className="text-gray-700 hover:text-blue-600">
               Home
             </button>
 
@@ -60,7 +68,6 @@ const Navbar = () => {
                 }`}
               >
                 <div className="grid grid-cols-4 gap-4">
-
                   {[0, 1, 2].map((colIndex) => (
                     <div key={colIndex} className="flex flex-col space-y-2">
                       {districts.slice(colIndex * 3, colIndex * 3 + 3).map((district) => (
@@ -91,13 +98,14 @@ const Navbar = () => {
             </div>
 
             <button 
-            onClick={() => navigate("/activities")} 
-            className="text-gray-700 hover:text-blue-600"
-             >
-            Activities
+              onClick={handleActivitiesClick}
+              className="text-gray-700 hover:text-blue-600"
+            >
+              Activities
             </button>
 
             <a href="#" className="text-gray-700 hover:text-blue-600">Hotels</a>
+
             <button
               onClick={() => navigate("/community-post")}
               className="text-gray-700 hover:text-blue-600"

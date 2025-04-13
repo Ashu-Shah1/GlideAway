@@ -4,7 +4,6 @@ import Navbar from "./components/Navbar";
 import TravelCommunity from "./components/TravelCommunity";
 import Header from './components/Header';
 import DestinationSearch from './components/DestinationSearch';
-import WeatherUpdate from './components/WeatherUpdate';
 import Footer from "./components/Footer";
 import CommunityPostPage from './components/CommunityPostPage';
 import Auth from './components/Authentication';
@@ -15,20 +14,21 @@ import InteractiveMap from './components/InteractiveMap';
 import VideoSection from './components/VideoSection';
 import StateInfo from './components/StatesInfo';
 import AiFeature from './components/AiFeature';
+import Feature from './components/Feature';
 import Treks from './components/Treks';
-import AboutUs from './components/AboutUs';
+import Adventure from './components/Adventure';
+import Spiritual from './components/Spiritual';
+import { useRef } from 'react';
 
-const Layout = ({ children, hideHeader = false }) => {
+const Layout = ({ children, hideHeader = false, activitiesRef }) => {
   const location = useLocation();
   
-  // Hide header and navbar on /auth page
   const hideHeaderAndNavbar = location.pathname === "/auth";
-  // Hide header based on prop or specific routes
-  const shouldHideHeader = hideHeader || location.pathname === "/community-post" || location.pathname.startsWith("/destination/") || location.pathname === "/AboutUs";
+  const shouldHideHeader = hideHeader || location.pathname === "/community-post" || location.pathname.startsWith("/destination/");
 
   return (
     <div className="min-h-screen flex flex-col">
-      {!hideHeaderAndNavbar && <Navbar />}
+      {!hideHeaderAndNavbar && <Navbar activitiesRef={activitiesRef} />}
       {!hideHeaderAndNavbar && !shouldHideHeader && <Header />}
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {children}
@@ -39,65 +39,76 @@ const Layout = ({ children, hideHeader = false }) => {
 };
 
 const App = () => {
+  const activitiesRef = useRef(null);
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/home" replace />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/activities" element={<Activities />} />
-        <Route 
-          path="/destination/:district" 
-          element={
-            <Layout>
-              <StateInfo />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route 
+            path="/destination/:district" 
+            element={
+              <Layout activitiesRef={activitiesRef}>
+                <StateInfo />
+              </Layout>
+            } 
+          />
+          <Route path="/home" element={
+            <Layout activitiesRef={activitiesRef}>
+              <div className='mb-12'>
+                <DestinationSearch />
+              </div>
+              <div className='mt-16'>
+                <VideoSection />
+              </div>
+              <TransportOptions />
+              <PopularDestinations />
+              <div ref={activitiesRef}>
+              <Activities />
+              </div>
+              <TravelCommunity />
+              <div className='mt-16'>
+                <InteractiveMap />
+              </div>
             </Layout>
-          } 
-        />
-        <Route path="/home" element={
-          <Layout>
-            <div className='mb-12'>
-              <DestinationSearch />
+          } />
+          <Route path="/community-post" element={
+            <Layout activitiesRef={activitiesRef}>
+              <CommunityPostPage />
+            </Layout>
+          } />
+          <Route path="/Feature" element={
+            <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+              <Layout hideHeader={true} activitiesRef={activitiesRef}>
+                <Feature />
+              </Layout>
             </div>
-            <div className='mt-16'>
-              <VideoSection />
+          } />
+          <Route path="/trek" element={
+            <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+              <Layout hideHeader={true} activitiesRef={activitiesRef}>
+                <Treks />
+              </Layout>
             </div>
-            <TransportOptions />
-            <PopularDestinations />
-            <Activities />
-            <TravelCommunity />
-            <div className='mt-16'>
-              <InteractiveMap />
+          } />
+          <Route path="/adventure" element={
+            <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+              <Layout hideHeader={true} activitiesRef={activitiesRef}>
+                <Adventure />
+              </Layout>
             </div>
-          </Layout>
-        } />
-        <Route path="/community-post" element={
-          <Layout>
-            <CommunityPostPage />
-          </Layout>
-        } />
-        <Route path="/aiFeature" element={
-          <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-            <Layout hideHeader={true}>
-              <AiFeature />
-            </Layout>
-          </div>
-        } />
-        <Route path="/trek" element={
-          <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-            <Layout hideHeader={true}>
-              <Treks />
-            </Layout>
-          </div>
-        } />
-        <Route path="/AboutUs" element={
-          <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-            <Layout hideHeader={true}>
-              <AboutUs />
-            </Layout>
-          </div>
-        } />
-      </Routes>
-    </Router>
+          } />
+          <Route path="/spiritual" element={
+            <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+              <Layout hideHeader={true} activitiesRef={activitiesRef}>
+                <Spiritual />
+              </Layout>
+            </div>
+          } />
+
+        </Routes>
+      </Router>
   );
 };
 
