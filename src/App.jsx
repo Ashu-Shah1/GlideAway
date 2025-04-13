@@ -18,13 +18,14 @@ import Feature from './components/Feature';
 import Treks from './components/Treks';
 import Adventure from './components/Adventure';
 import Spiritual from './components/Spiritual';
+import AboutUs from './components/AboutUs';
 import { useRef } from 'react';
 
 const Layout = ({ children, hideHeader = false, activitiesRef }) => {
   const location = useLocation();
   
   const hideHeaderAndNavbar = location.pathname === "/auth";
-  const shouldHideHeader = hideHeader || location.pathname === "/community-post" || location.pathname.startsWith("/destination/");
+  const shouldHideHeader = hideHeader || location.pathname === "/community-post" || location.pathname.startsWith("/destination/") || location.pathname === "/AboutUs";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -103,6 +104,13 @@ const App = () => {
             <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
               <Layout hideHeader={true} activitiesRef={activitiesRef}>
                 <Spiritual />
+              </Layout>
+            </div>
+          } />
+          <Route path="/AboutUs" element={
+            <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+              <Layout hideHeader={true} activitiesRef={activitiesRef}>
+                <AboutUs/>
               </Layout>
             </div>
           } />
