@@ -56,104 +56,38 @@ function AboutUs() {
       description:
         "Join our network of Himalayan explorers to share experiences, get insider tips, and find travel companions for your next adventure.",
       icon: <Users className="w-8 h-8" />,
-      stats: "10,000+ active members",
     },
     {
       title: "Curated Accommodations",
       description:
         "From luxury mountain resorts to authentic village homestays, we personally verify every property to ensure quality and value.",
       icon: <Hotel className="w-8 h-8" />,
-      stats: "500+ verified stays",
     },
     {
       title: "Diverse Himalayan Experiences",
       description:
-        "Choose from 50+ activities including trekking, yoga retreats, wildlife safaris, and cultural immersions across Uttarakhand.",
+        "Explore Uttarakhand through our handpicked experiences, categorized into Trekking trails, Spiritual tours to sacred shrines, and adrenaline-packed Adventure sports — crafted for every kind of traveler",
       icon: <Mountain className="w-8 h-8" />,
-      stats: "200+ local guides",
     },
     {
       title: "Live Weather Updates",
       description:
         "Plan smarter with real-time weather forecasts for your destination, so you're always ready for the Himalayas' mood swings.",
       icon: <CloudSun className="w-8 h-8" />, // import from lucide-react
-      stats: "Updated hourly",
     },
     {
       title: "Secure User Authentication",
       description:
         "Your data is protected with end-to-end encryption and secure login systems, including email, OTP, and social login support.",
       icon: <ShieldCheck className="w-8 h-8" />,
-      stats: "100% data privacy",
     },
     {
-      title: "Unique Local Activities",
-      description:
-        "Engage in cultural experiences like village cooking classes, local farming, eco-volunteering, and temple trails designed by locals.",
-      icon: <WandSparkles className="w-8 h-8" />,
-      stats: "50+ immersive tours",
-    },
+      "title": "District-Wise Cultural Insights",
+      "description": "Discover the unique traditions, festivals, cuisines, and heritage of each district in Uttarakhand — curated to deepen your understanding of local culture.",
+      "icon": <WandSparkles className="w-8 h-8" />
+    }    
   ];
 
-  const teamPhilosophy = [
-    {
-      title: "Collaborative Planning",
-      description: "Weekly cross-team syncs ensure perfect trip balance",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-          />
-        </svg>
-      ),
-    },
-    {
-      title: "Local Partnerships",
-      description: "Jointly developed relationships for authentic experiences",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-          />
-        </svg>
-      ),
-    },
-    {
-      title: "Traveler-Centric",
-      description: "All decisions prioritize the traveler experience",
-      icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          />
-        </svg>
-      ),
-    },
-  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -261,7 +195,7 @@ function AboutUs() {
       </div>
 
       {/* Enhanced Key Features Section */}
-      <div className="py-20 bg-white">
+      <div className="py-18 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -435,164 +369,13 @@ function AboutUs() {
         </div>
       </div>
 
-      {/* Services Section */}
-      <div className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Our Comprehensive Services
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need for a perfect Himalayan getaway
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="grid md:grid-cols-3 gap-8"
-            initial="hidden"
-            whileInView="visible"
-            variants={containerVariants}
-            viewport={{ once: true, margin: "-100px" }}
-          >
-            <motion.div
-              variants={itemVariants}
-              className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <div className="h-48 bg-gray-100 flex items-center justify-center">
-                <div className="relative w-full h-full">
-                  <img
-                    src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=1932"
-                    alt="Community"
-                    className="w-full h-full object-cover opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                    <Users className="w-16 h-16 text-white" />
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-3 text-blue-800">
-                  Travel Community
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Connect with fellow travelers, share experiences, and get
-                  insider tips.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Forum discussions
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Meetup groups
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Experience sharing
-                  </li>
-                </ul>
-              </div>
-            </motion.div>
-
-            <motion.div
-              variants={itemVariants}
-              className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <div className="h-48 bg-gray-100 flex items-center justify-center">
-                <div className="relative w-full h-full">
-                  <img
-                    src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=2070"
-                    alt="Hotels"
-                    className="w-full h-full object-cover opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                    <Hotel className="w-16 h-16 text-white" />
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-3 text-blue-800">
-                  Accommodation Network
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Carefully selected stays ranging from luxury resorts to
-                  authentic homestays.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Verified reviews
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Best price guarantee
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Local hospitality
-                  </li>
-                </ul>
-              </div>
-            </motion.div>
-
-            <motion.div
-              variants={itemVariants}
-              className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <div className="h-48 bg-gray-100 flex items-center justify-center">
-                <div className="relative w-full h-full">
-                  <img
-                    src="https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&q=80&w=2076"
-                    alt="Activities"
-                    className="w-full h-full object-cover opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                    <Mountain className="w-16 h-16 text-white" />
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-3 text-blue-800">
-                  Activities & Experiences
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Curated adventures and cultural experiences for all types of
-                  travelers.
-                </p>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Trekking expeditions
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Cultural immersions
-                  </li>
-                  <li className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Seasonal activities
-                  </li>
-                </ul>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </div>
-
       {/* Contact Section */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
         viewport={{ once: true, margin: "-100px" }}
-        className="py-20 bg-gradient-to-br from-blue-900 to-black text-white"
+        className="py-20 my-20 bg-gradient-to-br from-blue-900 to-black text-white rounded-sm"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12">
