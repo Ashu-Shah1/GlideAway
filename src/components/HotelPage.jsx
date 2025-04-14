@@ -19,6 +19,71 @@ import {
 import axios from 'axios';
 
 const API_BASE_URL = 'https://agoda-com.p.rapidapi.com';
+const API_HEADERS = {
+  'X-RapidAPI-Key': import.meta.env.REACT_APP_RAPIDAPI_KEY || '980b26d263mshae216a32f98a796p1286f8jsn12966135627d',
+  'X-RapidAPI-Host': 'agoda-com.p.rapidapi.com'
+};
+
+// Utility function for adding delays
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+// Mock data for development
+const mockHotels = [
+  {
+    id: 1,
+    name: "Riverside Retreat",
+    location: "Rishikesh",
+    rating: 4.5,
+    price: 3500,
+    amenities: ["WiFi", "Pool", "Restaurant", "Yoga Deck"],
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 2,
+    name: "Mountain View Resort",
+    location: "Mussoorie",
+    rating: 4.2,
+    price: 4500,
+    amenities: ["WiFi", "Spa", "Mountain View", "Restaurant"],
+    image: "https://images.unsplash.com/photo-1582719471380-cd82f17d6cce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 3,
+    name: "Lakeview Inn",
+    location: "Nainital",
+    rating: 4.0,
+    price: 2800,
+    amenities: ["WiFi", "Breakfast", "Lake View", "Parking"],
+    image: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 4,
+    name: "Pilgrim's Rest",
+    location: "Kedarnath",
+    rating: 3.8,
+    price: 1800,
+    amenities: ["Hot Water", "Restaurant", "Temple View"],
+    image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 5,
+    name: "Wilderness Lodge",
+    location: "Jim Corbett",
+    rating: 4.7,
+    price: 5200,
+    amenities: ["WiFi", "Safari", "Pool", "Restaurant", "Jungle View"],
+    image: "https://images.unsplash.com/photo-1532330393537-9a3b5d5a819c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    id: 6,
+    name: "Snowpeak Cabins",
+    location: "Auli",
+    rating: 4.3,
+    price: 4800,
+    amenities: ["Heating", "Ski-in/Ski-out", "Restaurant", "Mountain View"],
+    image: "https://images.unsplash.com/photo-1518639192441-8fce0a366e2e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+  }
+];
 
 const HotelSearch = () => {
   // State management
@@ -46,6 +111,7 @@ const HotelSearch = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState(null);
 
   // Popular destinations in Uttarakhand
   const popularDestinations = [
@@ -68,12 +134,25 @@ const HotelSearch = () => {
     
     try {
       setLoading(prev => ({...prev, autoComplete: true}));
+      setError(null);
+      
+      if (process.env.NODE_ENV === 'development') {
+        await delay(300);
+        setSuggestions(popularDestinations
+          .filter(d => d.toLowerCase().includes(query.toLowerCase()))
+          .map(d => ({ name: d, type: "Destination" }))
+          .slice(0, 5));
+        return;
+      }
+
       const response = await axios.get(`${API_BASE_URL}/hotels/auto-complete`, {
-        params: { query }
+        params: { query },
+        headers: API_HEADERS
       });
       setSuggestions(response.data.slice(0, 5)); // Limit to 5 suggestions
     } catch (error) {
       console.error("Auto-complete error:", error);
+      setError("Failed to fetch suggestions. Please try again.");
     } finally {
       setLoading(prev => ({...prev, autoComplete: false}));
     }
@@ -85,6 +164,18 @@ const HotelSearch = () => {
     
     try {
       setLoading(prev => ({...prev, search: true}));
+      setError(null);
+      
+      // Use mock data in development
+      if (process.env.NODE_ENV === 'development') {
+        await delay(500);
+        setHotels(mockHotels);
+        setHasMore(false);
+        return;
+      }
+
+      await delay(300); // Add small delay to prevent rate limiting
+      
       const endpoint = filters.stayType === 'overnight' 
         ? '/hotels/search-overnight' 
         : '/hotels/search-day-use';
@@ -99,7 +190,8 @@ const HotelSearch = () => {
           amenities: filters.amenities.join(','),
           page: resetPage ? 1 : page,
           limit: 12
-        }
+        },
+        headers: API_HEADERS
       });
       
       if (resetPage) {
@@ -110,6 +202,14 @@ const HotelSearch = () => {
       setHasMore(response.data.hasMore);
     } catch (error) {
       console.error("Search error:", error);
+      
+      if (error.response?.status === 429) {
+        setError("Too many requests. Please wait a moment and try again.");
+        await delay(2000);
+        return searchHotels(resetPage);
+      } else {
+        setError("Failed to search hotels. Please try again.");
+      }
     } finally {
       setLoading(prev => ({...prev, search: false}));
     }
@@ -120,13 +220,48 @@ const HotelSearch = () => {
     try {
       setLoading(prev => ({...prev, details: true}));
       setSelectedHotel(hotelId);
+      setError(null);
       
+      // Use mock data in development
+      if (process.env.NODE_ENV === 'development') {
+        await delay(500);
+        const mockDetails = {
+          ...mockHotels.find(h => h.id === hotelId),
+          description: "A beautiful property with excellent amenities and stunning views. Perfect for a relaxing getaway in the mountains.",
+          images: [
+            "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1582719471380-cd82f17d6cce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+          ],
+          rooms: [
+            { type: "Deluxe Room", price: 3500, mealPlan: "Breakfast included" },
+            { type: "Suite", price: 5500, mealPlan: "All meals included" },
+            { type: "Standard Room", price: 2800, mealPlan: "Room only" }
+          ]
+        };
+        setHotelDetails(mockDetails);
+        fetchReviews(hotelId);
+        return;
+      }
+
       // Parallel API calls for better performance
       const [details, others, prices, grid] = await Promise.all([
-        axios.get(`${API_BASE_URL}/hotels/details`, { params: { hotelId } }),
-        axios.get(`${API_BASE_URL}/hotels/details-others`, { params: { hotelId } }),
-        axios.get(`${API_BASE_URL}/hotels/room-prices`, { params: { hotelId } }),
-        axios.get(`${API_BASE_URL}/hotels/room-grid`, { params: { hotelId } })
+        axios.get(`${API_BASE_URL}/hotels/details`, { 
+          params: { hotelId },
+          headers: API_HEADERS
+        }),
+        axios.get(`${API_BASE_URL}/hotels/details-others`, { 
+          params: { hotelId },
+          headers: API_HEADERS
+        }),
+        axios.get(`${API_BASE_URL}/hotels/room-prices`, { 
+          params: { hotelId },
+          headers: API_HEADERS
+        }),
+        axios.get(`${API_BASE_URL}/hotels/room-grid`, { 
+          params: { hotelId },
+          headers: API_HEADERS
+        })
       ]);
       
       setHotelDetails({
@@ -139,6 +274,7 @@ const HotelSearch = () => {
       fetchReviews(hotelId);
     } catch (error) {
       console.error("Details fetch error:", error);
+      setError("Failed to fetch hotel details. Please try again.");
     } finally {
       setLoading(prev => ({...prev, details: false}));
     }
@@ -148,12 +284,36 @@ const HotelSearch = () => {
   const fetchReviews = async (hotelId) => {
     try {
       setLoading(prev => ({...prev, reviews: true}));
+      setError(null);
+      
+      // Mock reviews in development
+      if (process.env.NODE_ENV === 'development') {
+        await delay(500);
+        setReviews([
+          {
+            author: "Traveler123",
+            rating: 5,
+            comment: "Amazing stay with beautiful views. The staff was very helpful and the food was delicious.",
+            date: "2 weeks ago"
+          },
+          {
+            author: "AdventureSeeker",
+            rating: 4,
+            comment: "Great location and comfortable rooms. Would definitely recommend.",
+            date: "1 month ago"
+          }
+        ]);
+        return;
+      }
+
       const response = await axios.get(`${API_BASE_URL}/hotels/reviews`, {
-        params: { hotelId, limit: 5 }
+        params: { hotelId, limit: 5 },
+        headers: API_HEADERS
       });
       setReviews(response.data);
     } catch (error) {
       console.error("Reviews fetch error:", error);
+      setError("Failed to fetch reviews.");
     } finally {
       setLoading(prev => ({...prev, reviews: false}));
     }
@@ -218,6 +378,13 @@ const HotelSearch = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
+          {error}
+        </div>
+      )}
+      
       {/* Search Header */}
       <div className="bg-white rounded-xl shadow-md p-6 mb-8 relative">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Find Stays in Uttarakhand</h2>
