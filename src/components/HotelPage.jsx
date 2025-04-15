@@ -1,914 +1,564 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { 
-  Search, 
-  Star, 
-  MapPin, 
-  Filter, 
-  Hotel, 
-  Home, 
-  Castle, 
-  Loader2, 
-  X, 
-  ChevronLeft, 
-  ChevronRight,
-  Calendar,
-  Users,
-  Clock,
-  Heart
-} from 'lucide-react';
-import axios from 'axios';
+  FaStar, FaMapMarkerAlt, FaBed, FaMoneyBillWave, FaCalendarAlt,
+  FaSearch, FaUser, FaHotel, FaFilter, FaTimes
+} from "react-icons/fa";
+import { IoIosTime } from "react-icons/io";
 
-const API_BASE_URL = 'https://agoda-com.p.rapidapi.com';
-const API_HEADERS = {
-  'X-RapidAPI-Key': import.meta.env.REACT_APP_RAPIDAPI_KEY || '980b26d263mshae216a32f98a796p1286f8jsn12966135627d',
-  'X-RapidAPI-Host': 'agoda-com.p.rapidapi.com'
-};
-
-// Utility function for adding delays
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-// Mock data for development
-const mockHotels = [
-  {
-    id: 1,
-    name: "Riverside Retreat",
-    location: "Rishikesh",
-    rating: 4.5,
-    price: 3500,
-    amenities: ["WiFi", "Pool", "Restaurant", "Yoga Deck"],
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: 2,
-    name: "Mountain View Resort",
-    location: "Mussoorie",
-    rating: 4.2,
-    price: 4500,
-    amenities: ["WiFi", "Spa", "Mountain View", "Restaurant"],
-    image: "https://images.unsplash.com/photo-1582719471380-cd82f17d6cce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: 3,
-    name: "Lakeview Inn",
-    location: "Nainital",
-    rating: 4.0,
-    price: 2800,
-    amenities: ["WiFi", "Breakfast", "Lake View", "Parking"],
-    image: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: 4,
-    name: "Pilgrim's Rest",
-    location: "Kedarnath",
-    rating: 3.8,
-    price: 1800,
-    amenities: ["Hot Water", "Restaurant", "Temple View"],
-    image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: 5,
-    name: "Wilderness Lodge",
-    location: "Jim Corbett",
-    rating: 4.7,
-    price: 5200,
-    amenities: ["WiFi", "Safari", "Pool", "Restaurant", "Jungle View"],
-    image: "https://images.unsplash.com/photo-1532330393537-9a3b5d5a819c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: 6,
-    name: "Snowpeak Cabins",
-    location: "Auli",
-    rating: 4.3,
-    price: 4800,
-    amenities: ["Heating", "Ski-in/Ski-out", "Restaurant", "Mountain View"],
-    image: "https://images.unsplash.com/photo-1518639192441-8fce0a366e2e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-  }
-];
-
-const HotelSearch = () => {
-  // State management
-  const [searchTerm, setSearchTerm] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
+const HotelPage = () => {
+  const [city, setCity] = useState("");
   const [hotels, setHotels] = useState([]);
-  const [loading, setLoading] = useState({
-    autoComplete: false,
-    search: false,
-    details: false,
-    reviews: false
+  const [filteredHotels, setFilteredHotels] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [searchParams, setSearchParams] = useState({
+    arrivalDate: new Date().toISOString().split('T')[0],
+    departureDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+    adults: 2,
+    children: 0,
+    rooms: 1
   });
   const [filters, setFilters] = useState({
-    priceRange: [1000, 20000],
-    types: [],
-    rating: null,
-    stayType: 'overnight',
+    priceRange: [0, 50000],
+    rating: 0,
     amenities: []
   });
-  const [selectedHotel, setSelectedHotel] = useState(null);
-  const [hotelDetails, setHotelDetails] = useState(null);
-  const [roomPrices, setRoomPrices] = useState([]);
-  const [reviews, setReviews] = useState([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState(null);
+  const [preloadedImages, setPreloadedImages] = useState({});
 
-  // Popular destinations in Uttarakhand
-  const popularDestinations = [
-    "Rishikesh", "Mussoorie", "Nainital", "Kedarnath", 
-    "Badrinath", "Dehradun", "Auli", "Jim Corbett", "Haridwar"
-  ];
+  // Normalize image URLs
+  const normalizeImageUrl = (url) => {
+    if (!url) return null;
+    
+    // Fix common URL patterns
+    if (url.includes('square50')) return url.replace('square50', 'square600');
+    if (url.includes('square6000')) return url.replace('square6000', 'square600');
+    if (url.includes('square200')) return url.replace('square200', 'square600');
+    
+    // If URL doesn't match any pattern but has known domain
+    if (url.includes('bstatic.com')) {
+      return url.replace(/\/(square|max)\d+/, '/square600');
+    }
+    
+    return url;
+  };
 
-  // Common amenities
-  const allAmenities = [
-    "WiFi", "Pool", "Spa", "Restaurant", "Parking",
-    "AC", "Breakfast", "Gym", "Pet Friendly", "Mountain View"
-  ];
+  // Preload images when hotels data changes
+  useEffect(() => {
+    if (hotels.length > 0) {
+      const imageUrls = hotels.flatMap(hotel => 
+        hotel.property?.photoUrls?.map(url => normalizeImageUrl(url)).filter(url => url) || []
+      );
+      
+      const preload = async () => {
+        const loaded = {};
+        await Promise.all(imageUrls.map(url => {
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => {
+              loaded[url] = true;
+              resolve();
+            };
+            img.onerror = () => {
+              // Try with a different size if the first attempt fails
+              const fallbackUrl = url.includes('square600') 
+                ? url.replace('square600', 'square300')
+                : url;
+              const fallbackImg = new Image();
+              fallbackImg.src = fallbackUrl;
+              fallbackImg.onload = () => {
+                loaded[fallbackUrl] = true;
+                resolve();
+              };
+              fallbackImg.onerror = () => resolve();
+            };
+          });
+        }));
+        setPreloadedImages(loaded);
+      };
+      
+      preload();
+    }
+  }, [hotels]);
 
-  // Debounced auto-complete search
-  const fetchSuggestions = useCallback(async (query) => {
-    if (!query.trim()) {
-      setSuggestions([]);
+  // Apply filters when hotels or filters change
+  useEffect(() => {
+    if (hotels.length > 0) {
+      const filtered = hotels.filter(hotel => {
+        const price = hotel.property?.priceBreakdown?.grossPrice?.value || 0;
+        const rating = hotel.property?.reviewScore || 0;
+        
+        return (
+          price >= filters.priceRange[0] &&
+          price <= filters.priceRange[1] &&
+          rating >= filters.rating
+        );
+      });
+      setFilteredHotels(filtered);
+    } else {
+      setFilteredHotels([]);
+    }
+  }, [hotels, filters]);
+
+  const ImageWithFallback = ({ src, alt, className }) => {
+    const getFallbackImage = () => {
+      return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgNDAwIj48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiPkhvdGVsIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+    };
+    
+    const [imgSrc, setImgSrc] = useState(getFallbackImage());
+    const [imageLoading, setImageLoading] = useState(true);
+
+    useEffect(() => {
+      if (!src) {
+        setImageLoading(false);
+        return;
+      }
+
+      const url = normalizeImageUrl(src);
+      if (!url) {
+        setImageLoading(false);
+        return;
+      }
+
+      setImageLoading(true);
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        setImgSrc(url);
+        setImageLoading(false);
+      };
+      img.onerror = () => {
+        // Try fallback size
+        const fallbackUrl = url.includes('square600') 
+          ? url.replace('square600', 'square300')
+          : url;
+        const fallbackImg = new Image();
+        fallbackImg.src = fallbackUrl;
+        fallbackImg.onload = () => {
+          setImgSrc(fallbackUrl);
+          setImageLoading(false);
+        };
+        fallbackImg.onerror = () => {
+          setImgSrc(getFallbackImage());
+          setImageLoading(false);
+        };
+      };
+    }, [src]);
+
+    return (
+      <div className="relative">
+        {imageLoading && (
+          <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-t-xl"></div>
+        )}
+        <img
+          src={imgSrc}
+          alt={alt}
+          className={`${className} ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+          loading="lazy"
+        />
+      </div>
+    );
+  };
+
+  const fetchHotels = async () => {
+    if (!city.trim()) {
+      setError("Please enter a city name");
       return;
     }
-    
+
+    setLoading(true);
+    setError("");
+    setHotels([]);
+    setPreloadedImages({});
+
     try {
-      setLoading(prev => ({...prev, autoComplete: true}));
-      setError(null);
-      
-      if (process.env.NODE_ENV === 'development') {
-        await delay(300);
-        setSuggestions(popularDestinations
-          .filter(d => d.toLowerCase().includes(query.toLowerCase()))
-          .map(d => ({ name: d, type: "Destination" }))
-          .slice(0, 5));
-        return;
-      }
-
-      const response = await axios.get(`${API_BASE_URL}/hotels/auto-complete`, {
-        params: { query },
-        headers: API_HEADERS
-      });
-      setSuggestions(response.data.slice(0, 5)); // Limit to 5 suggestions
-    } catch (error) {
-      console.error("Auto-complete error:", error);
-      setError("Failed to fetch suggestions. Please try again.");
-    } finally {
-      setLoading(prev => ({...prev, autoComplete: false}));
-    }
-  }, []);
-
-  // Main hotel search function
-  const searchHotels = useCallback(async (resetPage = true) => {
-    if (resetPage) setPage(1);
-    
-    try {
-      setLoading(prev => ({...prev, search: true}));
-      setError(null);
-      
-      // Use mock data in development
-      if (process.env.NODE_ENV === 'development') {
-        await delay(500);
-        setHotels(mockHotels);
-        setHasMore(false);
-        return;
-      }
-
-      await delay(300); // Add small delay to prevent rate limiting
-      
-      const endpoint = filters.stayType === 'overnight' 
-        ? '/hotels/search-overnight' 
-        : '/hotels/search-day-use';
-      
-      const response = await axios.get(`${API_BASE_URL}${endpoint}`, {
-        params: {
-          query: searchTerm,
-          minPrice: filters.priceRange[0],
-          maxPrice: filters.priceRange[1],
-          types: filters.types.join(','),
-          minRating: filters.rating,
-          amenities: filters.amenities.join(','),
-          page: resetPage ? 1 : page,
-          limit: 12
-        },
-        headers: API_HEADERS
-      });
-      
-      if (resetPage) {
-        setHotels(response.data.results);
-      } else {
-        setHotels(prev => [...prev, ...response.data.results]);
-      }
-      setHasMore(response.data.hasMore);
-    } catch (error) {
-      console.error("Search error:", error);
-      
-      if (error.response?.status === 429) {
-        setError("Too many requests. Please wait a moment and try again.");
-        await delay(2000);
-        return searchHotels(resetPage);
-      } else {
-        setError("Failed to search hotels. Please try again.");
-      }
-    } finally {
-      setLoading(prev => ({...prev, search: false}));
-    }
-  }, [searchTerm, filters, page]);
-
-  // Fetch hotel details
-  const fetchHotelDetails = useCallback(async (hotelId) => {
-    try {
-      setLoading(prev => ({...prev, details: true}));
-      setSelectedHotel(hotelId);
-      setError(null);
-      
-      // Use mock data in development
-      if (process.env.NODE_ENV === 'development') {
-        await delay(500);
-        const mockDetails = {
-          ...mockHotels.find(h => h.id === hotelId),
-          description: "A beautiful property with excellent amenities and stunning views. Perfect for a relaxing getaway in the mountains.",
-          images: [
-            "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1582719471380-cd82f17d6cce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-          ],
-          rooms: [
-            { type: "Deluxe Room", price: 3500, mealPlan: "Breakfast included" },
-            { type: "Suite", price: 5500, mealPlan: "All meals included" },
-            { type: "Standard Room", price: 2800, mealPlan: "Room only" }
-          ]
-        };
-        setHotelDetails(mockDetails);
-        fetchReviews(hotelId);
-        return;
-      }
-
-      // Parallel API calls for better performance
-      const [details, others, prices, grid] = await Promise.all([
-        axios.get(`${API_BASE_URL}/hotels/details`, { 
-          params: { hotelId },
-          headers: API_HEADERS
-        }),
-        axios.get(`${API_BASE_URL}/hotels/details-others`, { 
-          params: { hotelId },
-          headers: API_HEADERS
-        }),
-        axios.get(`${API_BASE_URL}/hotels/room-prices`, { 
-          params: { hotelId },
-          headers: API_HEADERS
-        }),
-        axios.get(`${API_BASE_URL}/hotels/room-grid`, { 
-          params: { hotelId },
-          headers: API_HEADERS
-        })
-      ]);
-      
-      setHotelDetails({
-        ...details.data,
-        ...others.data,
-        rooms: [...prices.data, ...grid.data]
-      });
-      
-      // Fetch reviews separately since they might be heavy
-      fetchReviews(hotelId);
-    } catch (error) {
-      console.error("Details fetch error:", error);
-      setError("Failed to fetch hotel details. Please try again.");
-    } finally {
-      setLoading(prev => ({...prev, details: false}));
-    }
-  }, []);
-
-  // Fetch reviews
-  const fetchReviews = async (hotelId) => {
-    try {
-      setLoading(prev => ({...prev, reviews: true}));
-      setError(null);
-      
-      // Mock reviews in development
-      if (process.env.NODE_ENV === 'development') {
-        await delay(500);
-        setReviews([
-          {
-            author: "Traveler123",
-            rating: 5,
-            comment: "Amazing stay with beautiful views. The staff was very helpful and the food was delicious.",
-            date: "2 weeks ago"
+      const destRes = await axios.get(
+        "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchDestination",
+        {
+          params: { query: city },
+          headers: {
+            "x-rapidapi-host": "booking-com15.p.rapidapi.com",
+            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
           },
-          {
-            author: "AdventureSeeker",
-            rating: 4,
-            comment: "Great location and comfortable rooms. Would definitely recommend.",
-            date: "1 month ago"
-          }
-        ]);
+        }
+      );
+
+      const destination = destRes.data?.data[0];
+      if (!destination) {
+        setError("City not found. Try another location.");
+        setLoading(false);
         return;
       }
 
-      const response = await axios.get(`${API_BASE_URL}/hotels/reviews`, {
-        params: { hotelId, limit: 5 },
-        headers: API_HEADERS
-      });
-      setReviews(response.data);
-    } catch (error) {
-      console.error("Reviews fetch error:", error);
-      setError("Failed to fetch reviews.");
+      const hotelRes = await axios.get(
+        "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels",
+        {
+          params: {
+            dest_id: destination.dest_id,
+            search_type: destination.search_type,
+            adults: searchParams.adults,
+            children_age: Array(searchParams.children).fill(0).join(','),
+            room_qty: searchParams.rooms,
+            arrival_date: searchParams.arrivalDate,
+            departure_date: searchParams.departureDate,
+            page_number: 1,
+            languagecode: "en-us",
+            currency_code: "INR"
+          },
+          headers: {
+            "x-rapidapi-host": "booking-com15.p.rapidapi.com",
+            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
+          },
+        }
+      );
+
+      const hotelList = hotelRes.data?.data?.hotels || [];
+      setHotels(hotelList);
+      
+      if (hotelList.length === 0) {
+        setError("No hotels found. Try different dates or location.");
+      }
+    } catch (err) {
+      console.error("Hotel search error:", err);
+      setError("Failed to load hotels. Please try again later.");
     } finally {
-      setLoading(prev => ({...prev, reviews: false}));
+      setLoading(false);
     }
   };
 
-  // Debounce and search effects
-  useEffect(() => {
-    const timer = setTimeout(() => fetchSuggestions(searchTerm), 300);
-    return () => clearTimeout(timer);
-  }, [searchTerm, fetchSuggestions]);
-
-  useEffect(() => {
-    searchHotels(true);
-  }, [searchTerm, filters, searchHotels]);
-
-  // Filter handlers
-  const handleTypeToggle = (type) => {
-    setFilters(prev => ({
-      ...prev,
-      types: prev.types.includes(type) 
-        ? prev.types.filter(t => t !== type) 
-        : [...prev.types, type]
-    }));
+  const parseHotelDetails = (hotel) => {
+    const parts = hotel.accessibilityLabel?.split('\n')?.filter(p => p.trim()) || [];
+    return {
+      name: parts[0]?.split('.')[0]?.trim() || hotel.property?.name || "Unnamed Hotel",
+      rating: hotel.property?.reviewScore || 0,
+      reviewCount: hotel.property?.reviewCount || 0,
+      location: parts[1]?.trim() || "Location not specified",
+      roomType: parts[2]?.trim() || "Room details not available",
+      price: hotel.property?.priceBreakdown?.grossPrice?.value || 0,
+      priceDisplay: parts[3]?.trim() || "Price not available",
+      taxes: parts[4]?.trim() || "",
+      currency: hotel.property?.priceBreakdown?.grossPrice?.currency || "INR"
+    };
   };
 
-  const handleAmenityToggle = (amenity) => {
-    setFilters(prev => ({
-      ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter(a => a !== amenity)
-        : [...prev.amenities, amenity]
-    }));
+  const handlePriceChange = (min, max) => {
+    setFilters({...filters, priceRange: [min, max]});
   };
 
-  const resetFilters = () => {
-    setFilters({
-      priceRange: [1000, 20000],
-      types: [],
-      rating: null,
-      stayType: 'overnight',
-      amenities: []
-    });
-  };
-
-  // Image navigation
-  const nextImage = () => {
-    setCurrentImageIndex(prev => 
-      (prev + 1) % (hotelDetails?.images?.length || 1)
-    );
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex(prev => 
-      prev === 0 ? (hotelDetails?.images?.length || 1) - 1 : prev - 1
-    );
-  };
-
-  // Load more hotels
-  const loadMore = () => {
-    setPage(prev => prev + 1);
+  const handleRatingChange = (rating) => {
+    setFilters({...filters, rating});
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
-          {error}
-        </div>
-      )}
-      
-      {/* Search Header */}
-      <div className="bg-white rounded-xl shadow-md p-6 mb-8 relative">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Find Stays in Uttarakhand</h2>
-        
-        <div className="relative mb-4">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search by destination or hotel name..."
-            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {loading.autoComplete && (
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-            </div>
-          )}
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Search Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl font-bold mb-4">Find Your Perfect Stay</h1>
+          <p className="text-xl mb-8">Discover the best hotels at amazing prices</p>
           
-          {/* Suggestions dropdown */}
-          {suggestions.length > 0 && (
-            <div className="absolute z-20 mt-1 w-full bg-white shadow-lg rounded-lg border border-gray-200 max-h-60 overflow-y-auto">
-              {suggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                  onClick={() => {
-                    setSearchTerm(suggestion.name);
-                    setSuggestions([]);
-                  }}
-                >
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                    <div>
-                      <p className="font-medium">{suggestion.name}</p>
-                      {suggestion.type && (
-                        <p className="text-xs text-gray-500">{suggestion.type}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {/* Quick filters */}
-        <div className="flex flex-wrap gap-4 mb-4">
-          <button
-            onClick={() => setFilters(prev => ({...prev, stayType: 'overnight'}))}
-            className={`flex items-center px-4 py-2 rounded-lg ${filters.stayType === 'overnight' ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}
-          >
-            <Clock className="h-4 w-4 mr-2" />
-            Overnight Stays
-          </button>
-          <button
-            onClick={() => setFilters(prev => ({...prev, stayType: 'day-use'}))}
-            className={`flex items-center px-4 py-2 rounded-lg ${filters.stayType === 'day-use' ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}
-          >
-            <Calendar className="h-4 w-4 mr-2" />
-            Day Use
-          </button>
-          
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className="md:hidden flex items-center px-4 py-2 bg-gray-100 rounded-lg"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
-          </button>
-        </div>
-        
-        {/* Popular destinations */}
-        <div className="mb-2">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Popular in Uttarakhand:</h3>
-          <div className="flex flex-wrap gap-2">
-            {popularDestinations.map(destination => (
-              <button
-                key={destination}
-                onClick={() => setSearchTerm(destination)}
-                className={`px-3 py-1 rounded-full text-sm flex items-center ${searchTerm === destination ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 hover:bg-gray-200'}`}
-              >
-                <MapPin className="h-4 w-4 mr-1" />
-                {destination}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      {/* Main Content */}
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Filters Sidebar - Left */}
-        <div className={`md:w-1/4 ${showFilters ? 'block' : 'hidden'} md:block`}>
-          <div className="bg-white rounded-xl shadow-md p-6 sticky top-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium flex items-center">
-                <Filter className="h-5 w-5 mr-2" />
-                Filters
-              </h3>
-              <button 
-                onClick={resetFilters}
-                className="text-sm text-indigo-600 hover:text-indigo-800"
-              >
-                Reset All
-              </button>
-            </div>
-            
-            {/* Price Range */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Price Range: ₹{filters.priceRange[0].toLocaleString()} - ₹{filters.priceRange[1].toLocaleString()}
-              </label>
-              <div className="px-2">
-                <input
-                  type="range"
-                  min="500"
-                  max="30000"
-                  step="500"
-                  value={filters.priceRange[0]}
-                  onChange={(e) => setFilters(prev => ({
-                    ...prev,
-                    priceRange: [parseInt(e.target.value), prev.priceRange[1]]
-                  }))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-                <input
-                  type="range"
-                  min="500"
-                  max="30000"
-                  step="500"
-                  value={filters.priceRange[1]}
-                  onChange={(e) => setFilters(prev => ({
-                    ...prev,
-                    priceRange: [prev.priceRange[0], parseInt(e.target.value)]
-                  }))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mt-2"
-                />
-              </div>
-            </div>
-            
-            {/* Property Type */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Property Type
-              </label>
-              <div className="space-y-2">
-                <button
-                  onClick={() => handleTypeToggle('hotel')}
-                  className={`flex items-center w-full px-3 py-2 rounded-lg border ${filters.types.includes('hotel') ? 'bg-indigo-100 border-indigo-500' : 'bg-white border-gray-300'}`}
-                >
-                  <Hotel className="h-4 w-4 mr-2" />
-                  <span>Hotels</span>
-                </button>
-                <button
-                  onClick={() => handleTypeToggle('airbnb')}
-                  className={`flex items-center w-full px-3 py-2 rounded-lg border ${filters.types.includes('airbnb') ? 'bg-indigo-100 border-indigo-500' : 'bg-white border-gray-300'}`}
-                >
-                  <Home className="h-4 w-4 mr-2" />
-                  <span>Airbnb</span>
-                </button>
-                <button
-                  onClick={() => handleTypeToggle('homestay')}
-                  className={`flex items-center w-full px-3 py-2 rounded-lg border ${filters.types.includes('homestay') ? 'bg-indigo-100 border-indigo-500' : 'bg-white border-gray-300'}`}
-                >
-                  <Home className="h-4 w-4 mr-2" />
-                  <span>Homestay</span>
-                </button>
-                <button
-                  onClick={() => handleTypeToggle('resort')}
-                  className={`flex items-center w-full px-3 py-2 rounded-lg border ${filters.types.includes('resort') ? 'bg-indigo-100 border-indigo-500' : 'bg-white border-gray-300'}`}
-                >
-                  <Castle className="h-4 w-4 mr-2" />
-                  <span>Resorts</span>
-                </button>
-              </div>
-            </div>
-            
-            {/* Rating */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Minimum Rating
-              </label>
-              <div className="flex space-x-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => setFilters(prev => ({
-                      ...prev,
-                      rating: prev.rating === star ? null : star
-                    }))}
-                    className={`p-2 rounded-full ${filters.rating && star <= filters.rating ? 'bg-yellow-100 text-yellow-500' : 'bg-gray-100 text-gray-400'}`}
-                  >
-                    <Star className="h-5 w-5 fill-current" />
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {/* Amenities */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amenities
-              </label>
-              <div className="space-y-2">
-                {allAmenities.map(amenity => (
-                  <button
-                    key={amenity}
-                    onClick={() => handleAmenityToggle(amenity)}
-                    className={`flex items-center w-full px-3 py-2 rounded-lg text-left ${filters.amenities.includes(amenity) ? 'bg-indigo-50 text-indigo-700' : 'bg-white'}`}
-                  >
-                    <span className="w-5 h-5 mr-2 border rounded-sm flex items-center justify-center">
-                      {filters.amenities.includes(amenity) && (
-                        <span className="w-3 h-3 bg-indigo-600 rounded-sm"></span>
-                      )}
-                    </span>
-                    {amenity}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Hotel Results - Right */}
-        <div className="md:w-3/4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-gray-800">
-              {loading.search ? 'Searching...' : `${hotels.length} ${filters.stayType === 'overnight' ? 'Stays' : 'Day Use Options'} Found`}
-            </h3>
-            <div className="text-sm text-gray-500">
-              {filters.types.length > 0 && (
-                <span className="mr-2">
-                  Types: {filters.types.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(', ')}
-                </span>
-              )}
-              {filters.rating && (
-                <span>
-                  Rating: {filters.rating}+ <Star className="inline h-4 w-4 fill-yellow-400 text-yellow-400" />
-                </span>
-              )}
-            </div>
-          </div>
-          
-          {loading.search ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
-                  <div className="h-48 bg-gray-200"></div>
-                  <div className="p-4">
-                    <div className="h-6 bg-gray-200 rounded mb-2 w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded mb-2 w-1/2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : hotels.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {hotels.map(hotel => (
-                  <HotelCard 
-                    key={hotel.id}
-                    hotel={hotel}
-                    stayType={filters.stayType}
-                    onClick={() => fetchHotelDetails(hotel.id)}
+          <div className="bg-white rounded-xl shadow-xl p-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Destination */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+                <div className="relative">
+                  <FaSearch className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="City or Hotel"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-gray-800 bg-white"
                   />
-                ))}
+                </div>
               </div>
               
-              {hasMore && (
-                <div className="mt-8 flex justify-center">
+              {/* Dates */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
+                <div className="relative">
+                  <FaCalendarAlt className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="date"
+                    value={searchParams.arrivalDate}
+                    onChange={(e) => setSearchParams({...searchParams, arrivalDate: e.target.value})}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Check-out</label>
+                <div className="relative">
+                  <FaCalendarAlt className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="date"
+                    value={searchParams.departureDate}
+                    onChange={(e) => setSearchParams({...searchParams, departureDate: e.target.value})}
+                    min={searchParams.arrivalDate}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
+                  />
+                </div>
+              </div>
+              
+              {/* Guests & Search Button */}
+              <div className="flex flex-col">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Guests & Rooms</label>
+                <div className="flex gap-2 flex-grow">
+                  <div className="relative flex-1">
+                    <FaUser className="absolute left-3 top-3 text-gray-400" />
+                    <select
+                      value={searchParams.adults}
+                      onChange={(e) => setSearchParams({...searchParams, adults: parseInt(e.target.value)})}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
+                    >
+                      {[1, 2, 3, 4, 5].map(num => (
+                        <option key={num} value={num}>{num} {num === 1 ? 'Adult' : 'Adults'}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
                   <button
-                    onClick={loadMore}
-                    disabled={loading.search}
-                    className="px-6 py-2 bg-white border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 flex items-center"
+                    onClick={fetchHotels}
+                    disabled={loading}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center justify-center disabled:opacity-70"
                   >
-                    {loading.search ? (
-                      <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                        Loading...
-                      </>
-                    ) : 'Load More'}
+                    {loading ? (
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <FaSearch className="mr-2" />
+                    )}
+                    Search
                   </button>
                 </div>
-              )}
-            </>
-          ) : (
-            <div className="bg-white rounded-xl shadow-md p-8 text-center">
-              <p className="text-gray-500 mb-4">No properties found matching your criteria</p>
-              <button 
-                onClick={resetFilters}
-                className="text-indigo-600 hover:text-indigo-800 font-medium flex items-center justify-center mx-auto"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Clear all filters
-              </button>
+              </div>
             </div>
-          )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <p className="mt-4 text-gray-600">Searching for hotels...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {filteredHotels.length > 0 ? (
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Filters Sidebar - Mobile */}
+            <div className="md:hidden">
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg mb-4"
+              >
+                <FaFilter /> Filters
+              </button>
+              
+              {showFilters && (
+                <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold">Filters</h3>
+                    <button onClick={() => setShowFilters(false)}>
+                      <FaTimes />
+                    </button>
+                  </div>
+                  <FilterSection 
+                    filters={filters} 
+                    onPriceChange={handlePriceChange} 
+                    onRatingChange={handleRatingChange} 
+                  />
+                </div>
+              )}
+            </div>
+            
+            {/* Filters Sidebar - Desktop */}
+            <div className="hidden md:block w-64 flex-shrink-0">
+              <div className="bg-white p-4 rounded-lg shadow-md sticky top-4">
+                <h3 className="font-bold text-lg mb-4">Filters</h3>
+                <FilterSection 
+                  filters={filters} 
+                  onPriceChange={handlePriceChange} 
+                  onRatingChange={handleRatingChange} 
+                />
+              </div>
+            </div>
+            
+            {/* Hotels List */}
+            <div className="flex-1">
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {filteredHotels.length} Hotels in {city}
+                </h2>
+                <div className="text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
+                  {new Date(searchParams.arrivalDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - 
+                  {new Date(searchParams.departureDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {' • '}
+                  {searchParams.adults} {searchParams.adults === 1 ? 'Adult' : 'Adults'}
+                  {' • '}
+                  {searchParams.rooms} {searchParams.rooms === 1 ? 'Room' : 'Rooms'}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                {filteredHotels.map((hotel) => {
+                  const details = parseHotelDetails(hotel);
+                  
+                  return (
+                    <div key={hotel.hotel_id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                      <div className="relative h-48 overflow-hidden">
+                        <ImageWithFallback
+                          src={hotel.property?.photoUrls?.[0]}
+                          alt={details.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md text-sm font-medium flex items-center">
+                          <FaStar className="mr-1" />
+                          {details.rating.toFixed(1)}
+                        </div>
+                      </div>
+
+                      <div className="p-5">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2 truncate">{details.name}</h3>
+                        
+                        <div className="flex items-start text-gray-600 mb-2">
+                          <FaMapMarkerAlt className="mt-1 mr-2 flex-shrink-0" />
+                          <span className="text-sm">{details.location}</span>
+                        </div>
+                        
+                        <div className="flex items-start text-gray-600 mb-3">
+                          <FaBed className="mt-1 mr-2 flex-shrink-0" />
+                          <span className="text-sm">{details.roomType}</span>
+                        </div>
+                        
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center text-green-600 font-medium">
+                              <FaMoneyBillWave className="mr-2" />
+                              {details.priceDisplay}
+                            </div>
+                            
+                            <div className="flex items-center text-sm text-gray-500">
+                              <IoIosTime className="mr-1" />
+                              {hotel.property?.checkin?.fromTime || '12:00'} - {hotel.property?.checkout?.untilTime || '10:00'}
+                            </div>
+                          </div>
+                          
+                          {details.taxes && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              +{details.taxes}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                          <FaHotel className="mr-2" />
+                          Book Now
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ) : (
+          !loading && !error && (
+            <div className="text-center py-12">
+              <div className="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <FaSearch className="text-blue-600 text-3xl" />
+              </div>
+              <h3 className="text-xl font-medium text-gray-800 mb-2">Find your perfect stay</h3>
+              <p className="text-gray-600">Search for hotels in your desired location</p>
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  );
+};
+
+const FilterSection = ({ filters, onPriceChange, onRatingChange }) => {
+  const priceMarks = {
+    0: '₹0',
+    10000: '₹10k',
+    20000: '₹20k',
+    30000: '₹30k',
+    40000: '₹40k',
+    50000: '₹50k+'
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h4 className="font-medium mb-2">Price Range</h4>
+        <div className="px-2">
+          <input
+            type="range"
+            min="0"
+            max="50000"
+            step="1000"
+            value={filters.priceRange[1]}
+            onChange={(e) => onPriceChange(filters.priceRange[0], e.target.value)}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            {Object.entries(priceMarks).map(([value, label]) => (
+              <span key={value}>{label}</span>
+            ))}
+          </div>
+          <div className="text-sm mt-2">
+            Selected: ₹{filters.priceRange[0]} - ₹{filters.priceRange[1]}
+          </div>
         </div>
       </div>
       
-      {/* Hotel Details Modal */}
-      {selectedHotel && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            {loading.details ? (
-              <div className="flex justify-center items-center h-64">
-                <Loader2 className="h-12 w-12 text-indigo-600 animate-spin" />
-              </div>
-            ) : (
-              <>
-                {/* Modal Header */}
-                <div className="sticky top-0 bg-white z-10 border-b p-4 flex justify-between items-center">
-                  <h3 className="text-xl font-bold text-gray-800">{hotelDetails?.name}</h3>
-                  <button
-                    onClick={() => setSelectedHotel(null)}
-                    className="p-2 rounded-full hover:bg-gray-100"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-                
-                {/* Modal Content */}
-                <div className="p-6">
-                  {/* Image Gallery */}
-                  {hotelDetails?.images?.length > 0 && (
-                    <div className="relative h-64 md:h-96 rounded-xl overflow-hidden mb-6">
-                      <img
-                        src={hotelDetails.images[currentImageIndex]}
-                        alt={hotelDetails.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        onClick={prevImage}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md hover:bg-white"
-                      >
-                        <ChevronLeft className="h-6 w-6" />
-                      </button>
-                      <button
-                        onClick={nextImage}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md hover:bg-white"
-                      >
-                        <ChevronRight className="h-6 w-6" />
-                      </button>
-                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-                        {hotelDetails.images.map((_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCurrentImageIndex(index)}
-                            className={`w-3 h-3 rounded-full ${index === currentImageIndex ? 'bg-white' : 'bg-white/50'}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Basic Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="md:col-span-2">
-                      <div className="flex items-center mb-4">
-                        <div className="flex items-center bg-yellow-50 px-3 py-1 rounded-full mr-4">
-                          <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 mr-1" />
-                          <span className="font-medium">{hotelDetails?.rating}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <MapPin className="h-5 w-5 mr-1" />
-                          {hotelDetails?.location}
-                        </div>
-                      </div>
-                      
-                      <h4 className="text-lg font-semibold mb-2">About this property</h4>
-                      <p className="text-gray-700 mb-4">{hotelDetails?.description}</p>
-                      
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        {hotelDetails?.amenities?.slice(0, 6).map((amenity, i) => (
-                          <div key={i} className="flex items-center">
-                            <span className="w-5 h-5 bg-indigo-100 rounded-full flex items-center justify-center mr-2">
-                              <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
-                            </span>
-                            <span>{amenity}</span>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <button className="text-indigo-600 hover:text-indigo-800 font-medium">
-                        Show all amenities
-                      </button>
-                    </div>
-                    
-                    {/* Booking Card */}
-                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 h-fit sticky top-4">
-                      <h4 className="text-xl font-bold text-gray-800 mb-4">Price Details</h4>
-                      
-                      <div className="space-y-4 mb-6">
-                        {hotelDetails?.rooms?.slice(0, 3).map((room, i) => (
-                          <div key={i} className="border-b border-gray-200 pb-4">
-                            <h5 className="font-medium">{room.type}</h5>
-                            <div className="flex justify-between items-center mt-2">
-                              <div>
-                                <p className="text-2xl font-bold">₹{room.price.toLocaleString()}</p>
-                                <p className="text-sm text-gray-500">{room.mealPlan || 'Room only'}</p>
-                              </div>
-                              <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
-                                Book Now
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium">
-                        View All Room Options
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {/* Reviews */}
-                  <div className="mb-8">
-                    <h4 className="text-lg font-semibold mb-4">Guest Reviews</h4>
-                    
-                    {loading.reviews ? (
-                      <div className="flex justify-center">
-                        <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
-                      </div>
-                    ) : reviews.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {reviews.map((review, i) => (
-                          <div key={i} className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex items-center mb-2">
-                              <div className="w-10 h-10 rounded-full bg-gray-300 mr-3"></div>
-                              <div>
-                                <p className="font-medium">{review.author}</p>
-                                <div className="flex items-center">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-4 w-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                            <p className="text-gray-700">{review.comment}</p>
-                            <p className="text-sm text-gray-500 mt-2">{review.date}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500">No reviews yet</p>
-                    )}
-                    
-                    {reviews.length > 0 && (
-                      <button className="text-indigo-600 hover:text-indigo-800 font-medium mt-4">
-                        See all reviews
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Hotel Card Component
-const HotelCard = ({ hotel, stayType, onClick }) => {
-  return (
-    <div 
-      onClick={onClick}
-      className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-    >
-      <div className="relative h-48 overflow-hidden">
-        <img 
-          src={hotel.image} 
-          alt={hotel.name}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-        />
-        <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center">
-          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-          <span className="text-sm font-medium">{hotel.rating}</span>
-        </div>
-        {stayType === 'day-use' && (
-          <div className="absolute top-2 left-2 bg-indigo-600 text-white px-2 py-1 rounded-full text-xs">
-            Day Use
-          </div>
-        )}
-      </div>
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-800 mb-1">{hotel.name}</h3>
-        <p className="text-gray-600 mb-2 flex items-center">
-          <MapPin className="h-4 w-4 mr-1" />
-          {hotel.location}
-        </p>
-        <div className="flex flex-wrap gap-1 mb-3">
-          {hotel.amenities.slice(0, 3).map((amenity, i) => (
-            <span key={i} className="text-xs bg-gray-100 px-2 py-1 rounded">
-              {amenity}
-            </span>
+      <div>
+        <h4 className="font-medium mb-2">Minimum Rating</h4>
+        <div className="flex flex-wrap gap-2">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => onRatingChange(star)}
+              className={`px-3 py-1 rounded-full ${filters.rating >= star ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}
+            >
+              {star} <FaStar className="inline ml-1" />
+            </button>
           ))}
         </div>
-        <div className="flex justify-between items-center">
-          <div>
-            <span className="text-lg font-bold text-indigo-600">₹{hotel.price.toLocaleString()}</span>
-            <span className="text-xs text-gray-500 ml-1">per {stayType === 'overnight' ? 'night' : 'day'}</span>
-          </div>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              // Handle quick book
-            }}
-            className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded"
-          >
-            Quick Book
-          </button>
+      </div>
+      
+      <div>
+        <h4 className="font-medium mb-2">Amenities</h4>
+        <div className="space-y-2">
+          {['Free WiFi', 'Pool', 'Gym', 'Parking', 'Restaurant'].map(amenity => (
+            <label key={amenity} className="flex items-center">
+              <input 
+                type="checkbox" 
+                className="mr-2 rounded text-blue-600 focus:ring-blue-500"
+              />
+              {amenity}
+            </label>
+          ))}
         </div>
       </div>
     </div>
   );
 };
 
-export default HotelSearch;
+export default HotelPage;
