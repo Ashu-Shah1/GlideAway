@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { 
   FaStar, FaMapMarkerAlt, FaBed, FaMoneyBillWave, FaCalendarAlt,
-  FaSearch, FaUser, FaHotel, FaFilter, FaTimes
+  FaSearch, FaUser, FaHotel, FaFilter, FaTimes, FaWifi, FaSwimmingPool,
+  FaParking, FaUtensils, FaDumbbell, FaChevronLeft, FaChevronRight,
+  FaInfoCircle, FaSnowflake, FaFan, FaSmokingBan, FaTv, FaConciergeBell,
+  FaSuitcase
 } from "react-icons/fa";
 import { IoIosTime } from "react-icons/io";
 
@@ -25,65 +28,114 @@ const HotelPage = () => {
     amenities: []
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [preloadedImages, setPreloadedImages] = useState({});
+  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [hotelPhotos, setHotelPhotos] = useState({});
+  const [hotelFacilities, setHotelFacilities] = useState({});
+  const [hotelDescriptions, setHotelDescriptions] = useState({});
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Normalize image URLs
   const normalizeImageUrl = (url) => {
     if (!url) return null;
-    
-    // Fix common URL patterns
+    if (url.includes('square1024')) return url.replace('square1024', 'square600');
     if (url.includes('square50')) return url.replace('square50', 'square600');
     if (url.includes('square6000')) return url.replace('square6000', 'square600');
     if (url.includes('square200')) return url.replace('square200', 'square600');
-    
-    // If URL doesn't match any pattern but has known domain
     if (url.includes('bstatic.com')) {
       return url.replace(/\/(square|max)\d+/, '/square600');
     }
-    
     return url;
   };
 
-  // Preload images when hotels data changes
-  useEffect(() => {
-    if (hotels.length > 0) {
-      const imageUrls = hotels.flatMap(hotel => 
-        hotel.property?.photoUrls?.map(url => normalizeImageUrl(url)).filter(url => url) || []
+  const getFallbackImage = () => {
+    return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgNDAwIj48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiPkhvdGVsIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+  };
+
+  const fetchHotelPhotos = async (hotelId) => {
+    try {
+      const response = await axios.get(
+        "https://booking-com15.p.rapidapi.com/api/v1/hotels/getHotelPhotos",
+        {
+          params: { hotel_id: hotelId },
+          headers: {
+            "x-rapidapi-host": "booking-com15.p.rapidapi.com",
+            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
+          },
+        }
       );
       
-      const preload = async () => {
-        const loaded = {};
-        await Promise.all(imageUrls.map(url => {
-          return new Promise((resolve) => {
-            const img = new Image();
-            img.src = url;
-            img.onload = () => {
-              loaded[url] = true;
-              resolve();
-            };
-            img.onerror = () => {
-              // Try with a different size if the first attempt fails
-              const fallbackUrl = url.includes('square600') 
-                ? url.replace('square600', 'square300')
-                : url;
-              const fallbackImg = new Image();
-              fallbackImg.src = fallbackUrl;
-              fallbackImg.onload = () => {
-                loaded[fallbackUrl] = true;
-                resolve();
-              };
-              fallbackImg.onerror = () => resolve();
-            };
-          });
-        }));
-        setPreloadedImages(loaded);
-      };
+      const photos = response.data?.data?.slice(0, 10).map(photo => ({
+        id: photo.id,
+        url: normalizeImageUrl(photo.url),
+        url_original: photo.url
+      })) || [];
       
-      preload();
+      return photos;
+    } catch (error) {
+      console.error("Error fetching hotel photos:", error);
+      return [];
     }
-  }, [hotels]);
+  };
 
-  // Apply filters when hotels or filters change
+  const fetchHotelFacilities = async (hotelId) => {
+    try {
+      const response = await axios.get(
+        "https://booking-com15.p.rapidapi.com/api/v1/hotels/getHotelFacilities",
+        {
+          params: { 
+            hotel_id: hotelId,
+            arrival_date: searchParams.arrivalDate,
+            departure_date: searchParams.departureDate,
+            languagecode: 'en-us'
+          },
+          headers: {
+            "x-rapidapi-host": "booking-com15.p.rapidapi.com",
+            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
+          },
+        }
+      );
+      
+      const data = response.data?.data || {};
+      const highlights = data.accommodationHighlights?.map(item => item.title) || [];
+      const facilities = data.facilities?.flatMap(facility => 
+        facility.instances?.map(instance => instance.title)
+      ) || [];
+      
+      return [...new Set([...highlights, ...facilities])];
+    } catch (error) {
+      console.error("Error fetching hotel facilities:", error);
+      return [];
+    }
+  };
+
+  const fetchHotelDescription = async (hotelId) => {
+    try {
+      const response = await axios.get(
+        "https://booking-com15.p.rapidapi.com/api/v1/hotels/getDescriptionAndInfo",
+        {
+          params: { 
+            hotel_id: hotelId,
+            languagecode: 'en-us'
+          },
+          headers: {
+            "x-rapidapi-host": "booking-com15.p.rapidapi.com",
+            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
+          },
+        }
+      );
+      
+      const descriptions = response.data?.data || [];
+      const combinedDescription = descriptions
+        .map(item => item.description)
+        .filter(Boolean)
+        .join('\n\n');
+      
+      return combinedDescription || "No description available";
+    } catch (error) {
+      console.error("Error fetching hotel description:", error);
+      return "Failed to load description";
+    }
+  };
+
   useEffect(() => {
     if (hotels.length > 0) {
       const filtered = hotels.filter(hotel => {
@@ -102,11 +154,20 @@ const HotelPage = () => {
     }
   }, [hotels, filters]);
 
-  const ImageWithFallback = ({ src, alt, className }) => {
-    const getFallbackImage = () => {
-      return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgNDAwIj48cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiPkhvdGVsIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
-    };
+  useEffect(() => {
+    if (!selectedHotel) return;
     
+    const photos = hotelPhotos[selectedHotel.hotel_id] || [];
+    if (photos.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex(prev => (prev + 1) % photos.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [selectedHotel, hotelPhotos]);
+
+  const ImageWithFallback = ({ src, alt, className, onLoad }) => {
     const [imgSrc, setImgSrc] = useState(getFallbackImage());
     const [imageLoading, setImageLoading] = useState(true);
 
@@ -125,38 +186,51 @@ const HotelPage = () => {
       setImageLoading(true);
       const img = new Image();
       img.src = url;
+      
       img.onload = () => {
         setImgSrc(url);
         setImageLoading(false);
+        if (onLoad) onLoad();
       };
+      
       img.onerror = () => {
-        // Try fallback size
-        const fallbackUrl = url.includes('square600') 
-          ? url.replace('square600', 'square300')
-          : url;
-        const fallbackImg = new Image();
-        fallbackImg.src = fallbackUrl;
-        fallbackImg.onload = () => {
-          setImgSrc(fallbackUrl);
-          setImageLoading(false);
-        };
-        fallbackImg.onerror = () => {
+        if (src !== url) {
+          const fallbackImg = new Image();
+          fallbackImg.src = src;
+          
+          fallbackImg.onload = () => {
+            setImgSrc(src);
+            setImageLoading(false);
+            if (onLoad) onLoad();
+          };
+          
+          fallbackImg.onerror = () => {
+            setImgSrc(getFallbackImage());
+            setImageLoading(false);
+          };
+        } else {
           setImgSrc(getFallbackImage());
           setImageLoading(false);
-        };
+        }
       };
-    }, [src]);
+    }, [src, onLoad]);
 
     return (
-      <div className="relative">
+      <div className="relative w-full h-full">
         {imageLoading && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-t-xl"></div>
+          <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
         )}
         <img
           src={imgSrc}
           alt={alt}
-          className={`${className} ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+          className={`${className} ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300 w-full h-full object-cover`}
           loading="lazy"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = getFallbackImage();
+          }}
         />
       </div>
     );
@@ -171,7 +245,9 @@ const HotelPage = () => {
     setLoading(true);
     setError("");
     setHotels([]);
-    setPreloadedImages({});
+    setHotelPhotos({});
+    setHotelFacilities({});
+    setHotelDescriptions({});
 
     try {
       const destRes = await axios.get(
@@ -217,6 +293,37 @@ const HotelPage = () => {
       const hotelList = hotelRes.data?.data?.hotels || [];
       setHotels(hotelList);
       
+      const hotelDataPromises = hotelList.map(async hotel => {
+        const [photos, facilities, description] = await Promise.all([
+          fetchHotelPhotos(hotel.hotel_id),
+          fetchHotelFacilities(hotel.hotel_id),
+          fetchHotelDescription(hotel.hotel_id)
+        ]);
+        
+        return {
+          hotelId: hotel.hotel_id,
+          photos,
+          facilities,
+          description
+        };
+      });
+      
+      const hotelDataResults = await Promise.all(hotelDataPromises);
+      
+      const photosMap = {};
+      const facilitiesMap = {};
+      const descriptionsMap = {};
+      
+      hotelDataResults.forEach(({ hotelId, photos, facilities, description }) => {
+        photosMap[hotelId] = photos;
+        facilitiesMap[hotelId] = facilities;
+        descriptionsMap[hotelId] = description;
+      });
+      
+      setHotelPhotos(photosMap);
+      setHotelFacilities(facilitiesMap);
+      setHotelDescriptions(descriptionsMap);
+      
       if (hotelList.length === 0) {
         setError("No hotels found. Try different dates or location.");
       }
@@ -251,17 +358,262 @@ const HotelPage = () => {
     setFilters({...filters, rating});
   };
 
+  const handleBookNow = async (hotel) => {
+    setSelectedHotel(hotel);
+    setCurrentImageIndex(0);
+    
+    if (!hotelPhotos[hotel.hotel_id]) {
+      const photos = await fetchHotelPhotos(hotel.hotel_id);
+      setHotelPhotos(prev => ({
+        ...prev,
+        [hotel.hotel_id]: photos
+      }));
+    }
+    
+    if (!hotelFacilities[hotel.hotel_id]) {
+      const facilities = await fetchHotelFacilities(hotel.hotel_id);
+      setHotelFacilities(prev => ({
+        ...prev,
+        [hotel.hotel_id]: facilities
+      }));
+    }
+    
+    if (!hotelDescriptions[hotel.hotel_id]) {
+      const description = await fetchHotelDescription(hotel.hotel_id);
+      setHotelDescriptions(prev => ({
+        ...prev,
+        [hotel.hotel_id]: description
+      }));
+    }
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedHotel(null);
+  };
+
+  const handleNextImage = () => {
+    const photos = hotelPhotos[selectedHotel.hotel_id] || [];
+    setCurrentImageIndex(prev => (prev + 1) % photos.length);
+  };
+
+  const handlePrevImage = () => {
+    const photos = hotelPhotos[selectedHotel.hotel_id] || [];
+    setCurrentImageIndex(prev => (prev - 1 + photos.length) % photos.length);
+  };
+
+  const renderAmenityIcon = (amenity) => {
+    const amenityLower = amenity.toLowerCase();
+    if (amenityLower.includes('wifi')) return <FaWifi className="text-blue-500" />;
+    if (amenityLower.includes('pool')) return <FaSwimmingPool className="text-blue-500" />;
+    if (amenityLower.includes('parking')) return <FaParking className="text-blue-500" />;
+    if (amenityLower.includes('restaurant')) return <FaUtensils className="text-blue-500" />;
+    if (amenityLower.includes('gym') || amenityLower.includes('fitness')) return <FaDumbbell className="text-blue-500" />;
+    if (amenityLower.includes('air conditioning') || amenityLower.includes('ac')) return <FaSnowflake className="text-blue-500" />;
+    if (amenityLower.includes('fan')) return <FaFan className="text-blue-500" />;
+    if (amenityLower.includes('smoking')) return <FaSmokingBan className="text-blue-500" />;
+    if (amenityLower.includes('tv')) return <FaTv className="text-blue-500" />;
+    if (amenityLower.includes('service')) return <FaConciergeBell className="text-blue-500" />;
+    if (amenityLower.includes('storage') || amenityLower.includes('baggage')) return <FaSuitcase className="text-blue-500" />;
+    return <FaHotel className="text-blue-500" />;
+  };
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      fetchHotels();
+    }
+  };
+
+  const renderBookingModal = () => {
+    if (!selectedHotel) return null;
+
+    const details = parseHotelDetails(selectedHotel);
+    const photos = hotelPhotos[selectedHotel.hotel_id] || [];
+    const facilities = hotelFacilities[selectedHotel.hotel_id] || [];
+    const description = hotelDescriptions[selectedHotel.hotel_id] || "Loading description...";
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="relative">
+            {/* Main Image Section */}
+            <div className="relative h-80 md:h-96 rounded-t-xl overflow-hidden bg-gray-100">
+              {photos.length > 0 ? (
+                <>
+                  <div className="w-full h-full">
+                    <ImageWithFallback
+                      src={photos[currentImageIndex]?.url || photos[currentImageIndex]?.url_original}
+                      alt={`Hotel ${currentImageIndex + 1} of ${photos.length}`}
+                      className="w-full h-full"
+                    />
+                  </div>
+                  {photos.length > 1 && (
+                    <>
+                      <button 
+                        onClick={handlePrevImage}
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 p-3 rounded-full shadow-lg hover:bg-opacity-100"
+                      >
+                        <FaChevronLeft className="text-gray-800 text-xl" />
+                      </button>
+                      <button 
+                        onClick={handleNextImage}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 p-3 rounded-full shadow-lg hover:bg-opacity-100"
+                      >
+                        <FaChevronRight className="text-gray-800 text-xl" />
+                      </button>
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                        {photos.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentImageIndex(index)}
+                            className={`w-3 h-3 rounded-full transition-all ${currentImageIndex === index ? 'bg-white scale-125' : 'bg-white bg-opacity-50'}`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  No photos available
+                </div>
+              )}
+            </div>
+
+            {/* Thumbnail Gallery */}
+            {photos.length > 1 && (
+              <div className="p-4 grid grid-cols-5 gap-2">
+                {photos.map((photo, index) => (
+                  <button
+                    key={photo.id || index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`relative h-16 rounded-md overflow-hidden transition-all ${currentImageIndex === index ? 'ring-2 ring-blue-500' : 'opacity-80 hover:opacity-100'}`}
+                  >
+                    <ImageWithFallback
+                      src={photo.url || photo.url_original}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            <button
+              onClick={handleCloseDetails}
+              className="absolute top-4 right-4 bg-white bg-opacity-80 p-2 rounded-full shadow-md hover:bg-opacity-100"
+            >
+              <FaTimes className="text-gray-800" />
+            </button>
+          </div>
+          
+          <div className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">{details.name}</h2>
+                <div className="flex items-center mt-2">
+                  <FaMapMarkerAlt className="text-gray-500 mr-2" />
+                  <span className="text-gray-600">{details.location}</span>
+                </div>
+              </div>
+              <div className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
+                <FaStar className="text-yellow-500 mr-1" />
+                <span className="font-medium">{details.rating.toFixed(1)}</span>
+                <span className="text-gray-600 ml-1">({details.reviewCount} reviews)</span>
+              </div>
+            </div>
+            
+            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+              <div className="flex items-center mb-2">
+                <FaInfoCircle className="text-blue-500 mr-2" />
+                <h3 className="text-lg font-semibold">About the Hotel</h3>
+              </div>
+              <p className="text-gray-700 whitespace-pre-line">{description}</p>
+            </div>
+            
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Room Details</h3>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <FaBed className="text-gray-600 mr-2" />
+                    <span>{details.roomType}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <IoIosTime className="text-gray-600 mr-2" />
+                    <span>
+                      Check-in: {selectedHotel.property?.checkin?.fromTime || '12:00'} | 
+                      Check-out: {selectedHotel.property?.checkout?.untilTime || '10:00'}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="mt-6">
+                  <h3 className="text-xl font-semibold mb-4">Price Details</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">Room Price:</span>
+                      <span className="text-green-600 font-bold">
+                        {details.priceDisplay}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      + {details.taxes}
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Total for {searchParams.rooms} {searchParams.rooms === 1 ? 'room' : 'rooms'}:</span>
+                        <span className="text-green-600 font-bold text-lg">
+                          {details.currency} {details.price * searchParams.rooms}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Facilities & Amenities</h3>
+                {facilities.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {facilities.slice(0, 10).map((facility, index) => (
+                      <div key={index} className="flex items-center bg-gray-50 p-3 rounded-lg">
+                        {renderAmenityIcon(facility)}
+                        <span className="ml-2 text-sm">{facility}</span>
+                      </div>
+                    ))}
+                    {facilities.length > 10 && (
+                      <div className="col-span-2 text-center text-sm text-gray-500">
+                        + {facilities.length - 10} more facilities
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <p className="text-gray-600">No facilities information available</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-end">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                Confirm Booking
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Search Section */}
+      {/* Search Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl font-bold mb-4">Find Your Perfect Stay</h1>
-          <p className="text-xl mb-8">Discover the best hotels at amazing prices</p>
           
           <div className="bg-white rounded-xl shadow-xl p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Destination */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
                 <div className="relative">
@@ -270,13 +622,13 @@ const HotelPage = () => {
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
+                    onKeyPress={handleKeyPress} 
                     placeholder="City or Hotel"
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-gray-800 bg-white"
                   />
                 </div>
               </div>
               
-              {/* Dates */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Check-in</label>
                 <div className="relative">
@@ -305,7 +657,6 @@ const HotelPage = () => {
                 </div>
               </div>
               
-              {/* Guests & Search Button */}
               <div className="flex flex-col">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Guests & Rooms</label>
                 <div className="flex gap-2 flex-grow">
@@ -359,7 +710,9 @@ const HotelPage = () => {
           </div>
         )}
 
-        {filteredHotels.length > 0 ? (
+        {renderBookingModal()}
+
+        {filteredHotels.length > 0 && !selectedHotel ? (
           <div className="flex flex-col md:flex-row gap-6">
             {/* Filters Sidebar - Mobile */}
             <div className="md:hidden">
@@ -418,15 +771,29 @@ const HotelPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                 {filteredHotels.map((hotel) => {
                   const details = parseHotelDetails(hotel);
+                  const photos = hotelPhotos[hotel.hotel_id] || [];
                   
                   return (
                     <div key={hotel.hotel_id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                       <div className="relative h-48 overflow-hidden">
-                        <ImageWithFallback
-                          src={hotel.property?.photoUrls?.[0]}
-                          alt={details.name}
-                          className="w-full h-full object-cover"
-                        />
+                        {photos.length > 0 ? (
+                          <div className="relative h-full">
+                            <ImageWithFallback
+                              src={photos[0]?.url || photos[0]?.url_original}
+                              alt={details.name}
+                              className="w-full h-full"
+                            />
+                            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded-md text-xs">
+                              {photos.length}+ photos
+                            </div>
+                          </div>
+                        ) : (
+                          <ImageWithFallback
+                            src={hotel.property?.photoUrls?.[0]}
+                            alt={details.name}
+                            className="w-full h-full"
+                          />
+                        )}
                         <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md text-sm font-medium flex items-center">
                           <FaStar className="mr-1" />
                           {details.rating.toFixed(1)}
@@ -448,9 +815,11 @@ const HotelPage = () => {
                         
                         <div className="mt-4 pt-4 border-t border-gray-100">
                           <div className="flex justify-between items-center">
-                            <div className="flex items-center text-green-600 font-medium">
-                              <FaMoneyBillWave className="mr-2" />
-                              {details.priceDisplay}
+                            <div className="flex flex-col">
+                              <span className="text-xs text-gray-500">Starting from</span>
+                              <div className="flex items-center text-green-600 font-bold text-lg">
+                                {details.currency} {details.price}
+                              </div>
                             </div>
                             
                             <div className="flex items-center text-sm text-gray-500">
@@ -466,7 +835,10 @@ const HotelPage = () => {
                           )}
                         </div>
                         
-                        <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors flex items-center justify-center">
+                        <button 
+                          onClick={() => handleBookNow(hotel)}
+                          className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors flex items-center justify-center"
+                        >
                           <FaHotel className="mr-2" />
                           Book Now
                         </button>
@@ -478,7 +850,7 @@ const HotelPage = () => {
             </div>
           </div>
         ) : (
-          !loading && !error && (
+          !loading && !error && !selectedHotel && (
             <div className="text-center py-12">
               <div className="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                 <FaSearch className="text-blue-600 text-3xl" />
