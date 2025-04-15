@@ -58,7 +58,7 @@ const HotelPage = () => {
           params: { hotel_id: hotelId },
           headers: {
             "x-rapidapi-host": "booking-com15.p.rapidapi.com",
-            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
+            "x-rapidapi-key": import.meta.env.VITE_HotelApiKey,
           },
         }
       );
@@ -89,7 +89,7 @@ const HotelPage = () => {
           },
           headers: {
             "x-rapidapi-host": "booking-com15.p.rapidapi.com",
-            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
+            "x-rapidapi-key": import.meta.env.VITE_HotelApiKey,
           },
         }
       );
@@ -118,7 +118,7 @@ const HotelPage = () => {
           },
           headers: {
             "x-rapidapi-host": "booking-com15.p.rapidapi.com",
-            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
+            "x-rapidapi-key": import.meta.env.VITE_HotelApiKey,
           },
         }
       );
@@ -256,7 +256,7 @@ const HotelPage = () => {
           params: { query: city },
           headers: {
             "x-rapidapi-host": "booking-com15.p.rapidapi.com",
-            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
+            "x-rapidapi-key": import.meta.env.VITE_HotelApiKey,
           },
         }
       );
@@ -285,7 +285,7 @@ const HotelPage = () => {
           },
           headers: {
             "x-rapidapi-host": "booking-com15.p.rapidapi.com",
-            "x-rapidapi-key": "980b26d263mshae216a32f98a796p1286f8jsn12966135627d",
+            "x-rapidapi-key": import.meta.env.VITE_HotelApiKey,
           },
         }
       );
