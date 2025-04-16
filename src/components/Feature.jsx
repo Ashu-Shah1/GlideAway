@@ -5,21 +5,21 @@ const destinations = [
   {
     id: 1,
     name: 'Nainital',
-    image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990fea',
+    image: 'https://stampedmoments.com/wp-content/uploads/2022/09/boating-naini-lake.jpg',
     basePrice: 2000,
     hotelPricePerNight: 3000,
   },
   {
     id: 2,
     name: 'Rishikesh',
-    image: 'https://images.unsplash.com/photo-1591018653367-16fd6d6a5c5f',
+    image: 'https://www.justahotels.com/wp-content/uploads/2023/10/Places-To-Visit-in-Rishikesh-scaled.jpeg',
     basePrice: 1500,
     hotelPricePerNight: 2500,
   },
   {
     id: 3,
     name: 'Mussoorie',
-    image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220',
+    image: 'https://media1.thrillophilia.com/filestore/8g04nqjtiivm7nglko8db34bygwd_shutterstock_2365470931%20(1).jpg?w=400&dpr=2',
     basePrice: 2500,
     hotelPricePerNight: 4000,
   },
@@ -33,7 +33,7 @@ const destinations = [
   {
     id: 5,
     name: 'Jim Corbett',
-    image: 'https://images.unsplash.com/photo-1581772136271-1e822df9c9f3',
+    image: 'https://corbettgov.org/assets/images/jungle-safari-in-jim-corbett-national-park-1200x900.webp',
     basePrice: 3500,
     hotelPricePerNight: 6000,
   },

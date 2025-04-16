@@ -13,7 +13,7 @@ import Activities from './components/Activities';
 import InteractiveMap from './components/InteractiveMap';
 import VideoSection from './components/VideoSection';
 import StateInfo from './components/StatesInfo';
-import AiFeature from './components/AiFeature';
+// import AiFeature from './components/AiFeature';
 import Feature from './components/Feature';
 import Treks from './components/Treks';
 import Adventure from './components/Adventure';
