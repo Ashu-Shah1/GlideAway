@@ -4,7 +4,7 @@ const Header = () => {
 
   const navigate = useNavigate()
   function handelPlanTrip(){
-    navigate('/Feature')
+    navigate('/PlanTrip')
   }
   return (
     <div className="relative h-[600px] bg-cover bg-center" style={{

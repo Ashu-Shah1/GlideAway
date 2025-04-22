@@ -14,7 +14,8 @@ import InteractiveMap from './components/InteractiveMap';
 import VideoSection from './components/VideoSection';
 import StateInfo from './components/StatesInfo';
 // import AiFeature from './components/AiFeature';
-import Feature from './components/Feature';
+// import Feature from './components/Feature';
+import PlanTrip from './components/PlanTrip';
 import Treks from './components/Treks';
 import Adventure from './components/Adventure';
 import Spiritual from './components/Spiritual';
@@ -64,7 +65,7 @@ const App = () => {
               <div className='mt-16'>
                 <VideoSection />
               </div>
-              <TransportOptions />
+              {/* <TransportOptions /> */}
               <PopularDestinations />
               <div ref={activitiesRef}>
               <Activities />
@@ -80,10 +81,10 @@ const App = () => {
               <CommunityPostPage />
             </Layout>
           } />
-          <Route path="/Feature" element={
+          <Route path="/PlanTrip" element={
             <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
               <Layout hideHeader={true} activitiesRef={activitiesRef}>
-                <Feature />
+                <PlanTrip />
               </Layout>
             </div>
           } />
