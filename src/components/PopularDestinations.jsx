@@ -1,4 +1,4 @@
-import { useState, useEffect,useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MapPin, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useLocation } from "react-router-dom";
 
@@ -11,8 +11,7 @@ const destinations = [
     detailedDescription: 'Rishikesh, nestled in the foothills of the Himalayas along the Ganges River, is known as the "Yoga Capital of the World". It offers a perfect blend of spiritual retreats and adventure activities like white-water rafting and bungee jumping.',
     images: [
       '/src/assets/img/Rishikesh 10.jpg',
-      '/src/assets/img/Rishikesh 9.jpg',
-      '/src/assets/img/Rishikesh 6.jpg'
+      '/src/assets/img/Rishikesh 9.jpg'
     ]
   },
   {
@@ -23,8 +22,7 @@ const destinations = [
     detailedDescription: 'Mussoorie, with its green hills and varied flora and fauna, is a fascinating hill resort. The scenic beauty and pleasant weather make it a perfect holiday destination, offering spectacular views of the Himalayan peaks.',
     images: [
       '/src/assets/img/mussorie1.jpg',
-      '/src/assets/img/mussorie2.jpg',
-      '/src/assets/img/mussoie3.webp'
+      '/src/assets/img/mussorie2.jpg'
     ]
   },
   {
@@ -35,8 +33,7 @@ const destinations = [
     detailedDescription: 'Badrinath is one of the four Char Dham pilgrimage sites, dedicated to Lord Vishnu. Situated between Nar and Narayana mountain ranges, this sacred town is surrounded by breathtaking Himalayan peaks.',
     images: [
       '/src/assets/Badrinath-Temple.jpg',
-      '/src/assets/badrinath2.webp',
-      '/src/assets/badrinath3.jpg'
+      '/src/assets/badrinath2.webp'
     ]
   },
   {
@@ -46,9 +43,8 @@ const destinations = [
     description: 'Sacred Shiva Temple',
     detailedDescription: 'Kedarnath, another of the Char Dham, is the highest among the 12 Jyotirlingas of Lord Shiva. Located near the Mandakini River, this ancient temple is surrounded by snow-capped peaks, offering a divine experience.',
     images: [
-      'src/assets/img/Kedarnath-1.jpg',
-      'src/assets/img/Kedarnath-2.jpg',
-      'src/assets/img/Kedarnath-3.jpg'
+      '/src/assets/Kedarnath1.jpeg',
+      '/src/assets/Kedarnath2.jpeg'
     ]
   },
   {
@@ -58,9 +54,8 @@ const destinations = [
     description: 'Source of the Ganges',
     detailedDescription: 'Gangotri, the origin of the holy River Ganges, is one of the four Char Dham pilgrimage sites. The Gangotri Temple, dedicated to Goddess Ganga, is surrounded by stunning glaciers and mountains.',
     images: [
-      'src/assets/img/Gangotri-1.jpg',
-      'src/assets/img/Gangotri-2.jpg',
-      'src/assets/img/Gangotri-3.jpg'
+      '/src/assets/Gangotri-Dham-1.jpg',
+      '/src/assets/Gangotri-Dham2.jpg'
     ]
   },
   {
@@ -70,9 +65,8 @@ const destinations = [
     description: 'Source of the Yamuna',
     detailedDescription: 'Yamunotri, the source of the Yamuna River and the fourth Char Dham, is known for its thermal springs and the temple dedicated to Goddess Yamuna. The scenic trek to Yamunotri offers beautiful views of the Himalayas.',
     images: [
-      'src/assets/img/Yamunotri-1.jpg',
-      'src/assets/img/Yamunotri-2.jpg',
-      'src/assets/img/Yamunotri-3.jpg'
+      '/src/assets/yamunotri-1.webp',
+      '/src/assets/yamunotri-2.jpg'
     ]
   }
 ];
@@ -107,6 +101,7 @@ export function PopularDestinations() {
 
   const handleDestinationClick = (destination) => {
     setSelectedDestination(destination);
+    setModalImageIndex(0);
     setIsModalOpen(true);
     document.body.style.overflow = 'hidden';
   };
@@ -136,18 +131,18 @@ export function PopularDestinations() {
   const visibleDestinations = destinations.slice(currentIndex, currentIndex + 3);
 
   useEffect(() => {
-      if (location.hash === '#PopularDestinations') {
-        setTimeout(() => {
-          popularDestinationsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      } else {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
-      }
-    }, [location])
-  // Keyboard navigation for modal
+    if (location.hash === '#PopularDestinations') {
+      setTimeout(() => {
+        popularDestinationsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  }, [location]);
+
   useEffect(() => {
     if (!isModalOpen) return;
 
@@ -162,7 +157,7 @@ export function PopularDestinations() {
   }, [isModalOpen, modalImageIndex, selectedDestination]);
 
   return (
-    <section ref={popularDestinationsSectionRef} id="PopularDestinations"  className="relative bg-gray-50 rounded-xl p-6 md:p-8 my-16 md:my-20">
+    <section ref={popularDestinationsSectionRef} id="PopularDestinations" className="relative bg-gray-50 rounded-xl p-6 md:p-8 my-16 md:my-20">
       <div className="text-center mb-10 md:mb-12">
         <h2 className="text-3xl md:text-4xl font-bold mb-3 text-gray-900">Popular Destinations</h2>
         <p className="text-gray-600 max-w-2xl mx-auto text-lg">
@@ -180,12 +175,13 @@ export function PopularDestinations() {
                 transitionDirection === 'slide-left' ? 'animate-slide-left' : 'animate-slide-right'
               }`}
             >
-              <div className="aspect-w-16 aspect-h-9 overflow-hidden">
+              <div className="aspect-w-16 aspect-h-9 w-full h-64">
                 <img
                   src={destination.image}
                   alt={destination.name}
-                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   loading="lazy"
+                  style={{ objectPosition: 'center center' }}
                 />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
@@ -249,39 +245,44 @@ export function PopularDestinations() {
                 </button>
                 
                 {/* Image Gallery */}
-                <div className="relative h-64 md:h-[28rem] overflow-hidden group">
+                <div className="relative h-64 md:h-[28rem] w-full overflow-hidden group">
                   <img
                     src={selectedDestination.images[modalImageIndex]}
                     alt={selectedDestination.name}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     loading="lazy"
+                    style={{ objectPosition: 'center center' }}
                   />
                   
-                  <button
-                    onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-xl hover:bg-white transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <ChevronLeft className="h-6 w-6 text-gray-800" />
-                  </button>
-                  <button
-                    onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-xl hover:bg-white transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <ChevronRight className="h-6 w-6 text-gray-800" />
-                  </button>
-                  
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-                    {selectedDestination.images.map((_, index) => (
+                  {selectedDestination.images.length > 1 && (
+                    <>
                       <button
-                        key={index}
-                        onClick={(e) => { e.stopPropagation(); setModalImageIndex(index); }}
-                        className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none ${
-                          index === modalImageIndex ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/70'
-                        }`}
-                        aria-label={`Go to image ${index + 1}`}
-                      />
-                    ))}
-                  </div>
+                        onClick={prevImage}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-xl hover:bg-white transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      >
+                        <ChevronLeft className="h-6 w-6 text-gray-800" />
+                      </button>
+                      <button
+                        onClick={nextImage}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-xl hover:bg-white transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      >
+                        <ChevronRight className="h-6 w-6 text-gray-800" />
+                      </button>
+                      
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                        {selectedDestination.images.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={(e) => { e.stopPropagation(); setModalImageIndex(index); }}
+                            className={`w-3 h-3 rounded-full transition-all duration-300 focus:outline-none ${
+                              index === modalImageIndex ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/70'
+                            }`}
+                            aria-label={`Go to image ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
                 
                 {/* Content Section */}
