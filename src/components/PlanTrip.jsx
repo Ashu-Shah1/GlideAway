@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Search, MapPin, Calendar, Users, Star, Utensils, Mountain, Landmark, Moon, ShoppingBag, ArrowRight } from 'lucide-react';
+import { spiritualSites, adventureSpots } from '../data/uttarakhandData';
 
 const TripPlanner = () => {
-  // Form steps
   const [step, setStep] = useState(1);
   
-  // State for user inputs
   const [destination, setDestination] = useState('');
-  const [tripLength, setTripLength] = useState(3);
+  const [tripLength, setTripLength] = useState(2);
   const [travelDate, setTravelDate] = useState('');
   const [travelCompanions, setTravelCompanions] = useState('solo');
   const [interests, setInterests] = useState([]);
@@ -15,17 +14,34 @@ const TripPlanner = () => {
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
 
-  // Uttarakhand destinations with images
-  const uttarakhandDestinations = [
-    { id: 1, name: 'Nainital', image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990fea' },
-    { id: 2, name: 'Rishikesh', image: 'https://images.unsplash.com/photo-1591018653367-16fd6d6a5c5f' },
-    { id: 3, name: 'Mussoorie', image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220' },
-    { id: 4, name: 'Auli', image: 'https://images.unsplash.com/photo-1605540436563-5bca919ae766' },
-    { id: 5, name: 'Jim Corbett', image: 'https://images.unsplash.com/photo-1581772136271-1e822df9c9f3' },
-    { id: 6, name: 'Valley of Flowers', image: 'https://images.unsplash.com/photo-1581772136271-1e822df9c9f3' },
+  const [showSavePopup, setShowSavePopup] = useState(false);
+   
+  const handleSaveItinerary = () => {
+    // Save logic here (e.g., save to localStorage or API call)
+    setShowSavePopup(true);
+  
+    // Automatically hide after 2.5 seconds
+    setTimeout(() => {
+      setShowSavePopup(false);
+    }, 2500);
+  };
+  
+  const uttarakhandDistricts = [
+    "Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", 
+    "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", 
+    "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"
   ];
 
-  // Interest options
+  const uttarakhandDestinations = [
+    { id: 1, name: 'Nainital', image: 'https://www.naturetravelagency.com/uploads/1711105196best%20time%20to%20visit%20Nainita.jpg' },
+    { id: 2, name: 'Rishikesh', image: 'https://media.holidify.com/images/cmsuploads/compressed/laxman-jhula-rishikesh_20241205131202.jpg' },
+    { id: 3, name: 'Mussoorie', image: 'https://t.eucdn.in/tourism/lg/kempty-falls-3540012.webp' },
+    { id: 4, name: 'Auli', image: 'https://d3sftlgbtusmnv.cloudfront.net/blog/wp-content/uploads/2024/11/Things-To-Do-In-Auli-Cover-Photo-3-840x425.jpg' },
+    { id: 5, name: 'Jim Corbett', image: 'https://cdn.getyourguide.com/img/tour/64997c7cc18ae.jpeg/98.jpg' },
+    { id: 6, name: 'Valley of Flowers', image: 'https://t.eucdn.in/tourism/lg/valley-of-flowers-5353172.webp' },
+  ];
+
+  
   const interestOptions = [
     { id: 'attractions', name: 'Must-see attractions', icon: Star },
     { id: 'food', name: 'Great food', icon: Utensils },
@@ -39,46 +55,120 @@ const TripPlanner = () => {
   const generateItinerary = () => {
     setLoading(true);
     
-    setTimeout(() => {
-      const sampleItinerary = {
-        summary: `Your ${tripLength}-day trip to ${destination}`,
-        days: Array.from({ length: tripLength }, (_, i) => ({
-          day: i + 1,
-          activities: [
-            {
-              type: 'attraction',
-              name: `${destination} Attraction ${i + 1}`,
-              description: 'This is a must-see location',
-              time: 'Morning',
+        setTimeout(() => {
+            // Get activities based on selected interests and destination
+            const getActivities = () => {
+              let activities = [];
+        // Must-see attractions and Culture & history
+        if (interests.includes('attractions') || interests.includes('culture')) {
+            const spiritualSitesForDestination = spiritualSites.filter(
+              site => site.location.toLowerCase().includes(destination.toLowerCase())
+            );
+            
+            spiritualSitesForDestination.forEach((site, i) => {
+              activities.push({
+                type: 'attraction',
+                name: site.name,
+                description: site.description,
+                time: i === 0 ? 'Morning' : i === 1 ? 'Afternoon' : 'Evening',
+                duration: '2 hours',
+                rating: 4.5,
+                price: '$$',
+                image: site.image,
+                location: site.location
+              });
+            });
+          }
+        // Outdoor adventures
+        if (interests.includes('outdoors')) {
+            const adventureSpotsForDestination = adventureSpots.filter(
+              spot => spot.location.toLowerCase().includes(destination.toLowerCase())
+            );
+            
+            adventureSpotsForDestination.forEach((spot, i) => {
+              activities.push({
+                type: 'activity',
+                name: spot.name,
+                description: spot.description,
+                time: i === 0 ? 'Morning' : i === 1 ? 'Afternoon' : 'Evening',
+                duration: '3 hours',
+                rating: 4.7,
+                price: '$$$',
+                image: spot.image,
+                location: spot.location
+              });
+            });
+          }
+            // Great food
+            if (interests.includes('food')) {
+                activities.push({
+                  type: 'restaurant',
+                  name: `Local ${destination} Cuisine`,
+                  cuisine: 'Traditional local dishes',
+                  time: 'Lunch',
+                  duration: '1.5 hours',
+                  rating: 4.3,
+                  price: '$$',
+                  image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4',
+                  location: destination
+                });
+              }
+              
+              // Shopping
+              if (interests.includes('shopping')) {
+                activities.push({
+                  type: 'shopping',
+        name: `${destination} Local Market`,
+        description: 'Explore traditional handicrafts and souvenirs',
+        time: 'Evening',
+        duration: '2 hours',
+        rating: 4.0,
+        price: '$$',
+        image: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df',
+        location: destination
+      });
+    }
+    
+    return activities;
+  };
+  
+  // Distribute activities across days
+  const allActivities = getActivities();
+  const activitiesPerDay = Math.ceil(allActivities.length / tripLength);
+  
+  const days = Array.from({ length: tripLength }, (_, dayIndex) => {
+    const dayActivities = allActivities.slice(
+      dayIndex * activitiesPerDay,
+      (dayIndex + 1) * activitiesPerDay
+    );
+    
+    // Fill with default activities if not enough
+        while (dayActivities.length < 3) {
+            dayActivities.push({
+              type: ['attraction', 'restaurant', 'activity'][dayActivities.length],
+              name: `${destination} ${['Attraction', 'Restaurant', 'Activity'][dayActivities.length]} ${dayIndex + 1}`,
+              description: 'Explore local highlights',
+              time: ['Morning', 'Lunch', 'Afternoon'][dayActivities.length],
               duration: '2 hours',
-              rating: 4.5,
+              rating: 4.0,
               price: '$$',
               image: uttarakhandDestinations.find(d => d.name === destination)?.image || '',
-            },
-            {
-              type: 'restaurant',
-              name: `Local Restaurant ${i + 1}`,
-              cuisine: 'Local cuisine',
-              time: 'Lunch',
-              duration: '1 hour',
-              rating: 4.2,
-              price: '$$',
-              image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4',
-            },
-            {
-              type: 'activity',
-              name: `Cultural Activity ${i + 1}`,
-              description: 'Experience local culture',
-              time: 'Afternoon',
-              duration: '3 hours',
-              rating: 4.3,
-              price: '$$$',
-              image: 'https://images.unsplash.com/photo-1527631746610-bca00a040d60',
-            },
-          ],
-        })),
+              location: destination
+            });
+          }
+          
+          return {
+            day: dayIndex + 1,
+            activities: dayActivities
+          };
+        });
+        
+        const sampleItinerary = {
+          summary: `Your ${tripLength}-day trip to ${destination}`,
+          days: days,
         recommendations: [
           'Try the local specialty dish',
+          'Wear comfortable shoes for walking',
           'Visit the main square in the evening',
           'Book tickets in advance for popular attractions',
         ],
@@ -99,14 +189,24 @@ const TripPlanner = () => {
     }
   };
 
-  // Filter destinations based on search input
+  // Handle destination search with district suggestions
   const handleDestinationSearch = (value) => {
     setDestination(value);
-    if (value.length > 2) {
-      const filtered = uttarakhandDestinations.filter(dest =>
+    if (value.length > 0) {
+      const filteredDistricts = uttarakhandDistricts.filter(district =>
+        district.toLowerCase().includes(value.toLowerCase())
+      );
+      const filteredDestinations = uttarakhandDestinations.filter(dest =>
         dest.name.toLowerCase().includes(value.toLowerCase())
       );
-      setSuggestions(filtered);
+      
+      // Combine both districts and destinations in suggestions
+      const combinedSuggestions = [
+        ...filteredDistricts.map(district => ({ id: district, name: district, type: 'district' })),
+        ...filteredDestinations.map(dest => ({ ...dest, type: 'destination' }))
+      ];
+      
+      setSuggestions(combinedSuggestions);
     } else {
       setSuggestions([]);
     }
@@ -123,38 +223,48 @@ const TripPlanner = () => {
     switch (step) {
       case 1:
         return (
-          <div className="bg-white shadow rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Where in Uttarakhand would you like to go?</h2>
+            <div className="bg-white shadow rounded-lg p-6 mb-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Where in Uttarakhand would you like to go?</h2>
             
-            {/* Destination Search */}
-            <div className="mb-4 relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Search Destination</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  className="mt-2 block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Search Uttarakhand destinations..."
-                  value={destination}
-                  onChange={(e) => handleDestinationSearch(e.target.value)}
-                />
-              </div>
-              {suggestions.length > 0 && (
-                <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1">
-                  {suggestions.map((dest) => (
-                    <div
-                      key={dest.id}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => selectDestination(dest.name)}
-                    >
-                      {dest.name}
-                    </div>
-                  ))}
-                </div>
-              )}
+             {/* Destination Search */}
+        <div className="mb-4 relative">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Search Destination</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
+            <input
+              type="text"
+              className="mt-2 block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Search Uttarakhand destinations or districts..."
+              value={destination}
+              onChange={(e) => handleDestinationSearch(e.target.value)}
+            />
+          </div>
+          {suggestions.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 max-h-60 overflow-y-auto">
+              {suggestions.map((item) => (
+                <div
+                  key={item.id}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                  onClick={() => selectDestination(item.name)}
+                >
+                  {item.type === 'district' ? (
+                    <>
+                      <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+                      <span className="font-medium">{item.name} District</span>
+                    </>
+                  ) : (
+                    <>
+                      <Star className="h-4 w-4 mr-2 text-yellow-500" />
+                      <span>{item.name}</span>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
             
             {/* Popular Destinations Grid */}
             <div className="mt-8">
@@ -324,7 +434,7 @@ const TripPlanner = () => {
         return (
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">{itinerary.summary}</h2>
-            
+                                      
             {/* Daily Itinerary */}
             <div className="space-y-6">
               {itinerary.days.map((day) => (
@@ -335,7 +445,7 @@ const TripPlanner = () => {
                     {day.activities.map((activity, idx) => (
                       <div key={idx} className="flex flex-col md:flex-row gap-4">
                         <div className="w-full md:w-1/3 h-48 rounded-lg overflow-hidden">
-                          <img
+                                <img
                             src={activity.image}
                             alt={activity.name}
                             className="w-full h-full object-cover"
@@ -346,7 +456,8 @@ const TripPlanner = () => {
                             <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
                               {activity.type === 'attraction' && <Star className="h-5 w-5 text-indigo-600" />}
                               {activity.type === 'restaurant' && <Utensils className="h-5 w-5 text-indigo-600" />}
-                              {activity.type === 'activity' && <Mountain className="h-5 w-5 text-indigo-600" />}
+                                {activity.type === 'activity' && <Mountain className="h-5 w-5 text-indigo-600" />}
+                              {activity.type === 'shopping' && <ShoppingBag className="h-5 w-5 text-indigo-600" />}
                             </div>
                             <div className="flex-grow">
                               <h4 className="text-md font-medium text-gray-900">{activity.name}</h4>
@@ -360,6 +471,12 @@ const TripPlanner = () => {
                                 <span className="mx-2">•</span>
                                 <span>{activity.price}</span>
                               </div>
+                              {activity.location && (
+                                <div className="mt-1 flex items-center text-sm text-gray-500">
+                                  <MapPin className="w-4 h-4 mr-1" />
+                                <span>{activity.location}</span>
+                              </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -384,9 +501,17 @@ const TripPlanner = () => {
             
             {/* Save Button */}
             <div className="mt-6">
+            {showSavePopup && (
+            <div className="fixed top-6 right-6 z-50 bg-white border border-green-300 shadow-lg rounded-lg p-4 flex items-center space-x-3 animate-fade-in">
+            <div className="text-green-600 text-xl">✅</div>
+            <div className="text-green-700 font-semibold">Saved!</div>
+            </div>
+            )}
+
               <button
                 type="button"
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                onClick={handleSaveItinerary}
               >
                 Save Itinerary
               </button>
