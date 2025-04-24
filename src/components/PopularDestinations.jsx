@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useRef } from 'react';
 import { MapPin, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useLocation } from "react-router-dom";
 
 const destinations = [
   {
@@ -83,6 +84,8 @@ export function PopularDestinations() {
   const [modalImageIndex, setModalImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const popularDestinationsSectionRef = useRef(null);
+  const location = useLocation();
 
   const handleNext = () => {
     if (isAnimating) return;
@@ -132,6 +135,18 @@ export function PopularDestinations() {
 
   const visibleDestinations = destinations.slice(currentIndex, currentIndex + 3);
 
+  useEffect(() => {
+      if (location.hash === '#PopularDestinations') {
+        setTimeout(() => {
+          popularDestinationsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+    }, [location])
   // Keyboard navigation for modal
   useEffect(() => {
     if (!isModalOpen) return;
@@ -147,7 +162,7 @@ export function PopularDestinations() {
   }, [isModalOpen, modalImageIndex, selectedDestination]);
 
   return (
-    <section className="relative bg-gray-50 rounded-xl p-6 md:p-8 my-16 md:my-20">
+    <section ref={popularDestinationsSectionRef} id="PopularDestinations"  className="relative bg-gray-50 rounded-xl p-6 md:p-8 my-16 md:my-20">
       <div className="text-center mb-10 md:mb-12">
         <h2 className="text-3xl md:text-4xl font-bold mb-3 text-gray-900">Popular Destinations</h2>
         <p className="text-gray-600 max-w-2xl mx-auto text-lg">

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -10,7 +11,14 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-semibold mb-4">Explore Uttarakhand</h3>
             <ul className="space-y-2">
-              <li className="hover:text-blue-400 cursor-pointer">Popular Destinations</li>
+              <li className="hover:text-blue-400 cursor-pointer">
+                <Link 
+                  to="/home#PopularDestinations" 
+                  className="hover:text-blue-400 cursor-pointer"
+                >
+                  Popular Destinations
+                </Link>
+              </li>
               <li className="hover:text-blue-400 cursor-pointer">Travel Guides</li>
               <li className="hover:text-blue-400 cursor-pointer">Activities</li>
               <li className="hover:text-blue-400 cursor-pointer">Accommodations</li>
@@ -19,7 +27,14 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-semibold mb-4">Support</h3>
             <ul className="space-y-2">
-              <li className="hover:text-blue-400 cursor-pointer">Contact Us</li>
+              <li>
+                <Link 
+                  to="/AboutUs#contact" 
+                  className="hover:text-blue-400 cursor-pointer"
+                >
+                  Contact Us
+                </Link>
+              </li>
               <li className="hover:text-blue-400 cursor-pointer">FAQs</li>
               <li className="hover:text-blue-400 cursor-pointer">Terms & Conditions</li>
               <li className="hover:text-blue-400 cursor-pointer">Privacy Policy</li>
