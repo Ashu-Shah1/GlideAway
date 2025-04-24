@@ -236,9 +236,7 @@ const Spiritual = () => {
 
                 <p className="text-gray-600">{site.description}</p>
 
-                <button className="mt-4 w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 transition duration-300">
-                  Plan Visit
-                </button>
+               
               </div>
             </div>
           ))}
