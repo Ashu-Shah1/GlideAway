@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 import TravelCommunity from "./components/TravelCommunity";
@@ -6,22 +6,19 @@ import Header from './components/Header';
 import DestinationSearch from './components/DestinationSearch';
 import Footer from "./components/Footer";
 import CommunityPostPage from './components/CommunityPostPage';
-import Auth from './components/Authentication';
 import { PopularDestinations } from './components/PopularDestinations';
 import TransportOptions from './components/TransportOptions';
 import Activities from './components/Activities'; 
 import InteractiveMap from './components/InteractiveMap';
 import VideoSection from './components/VideoSection';
 import StateInfo from './components/StatesInfo';
-// import AiFeature from './components/AiFeature';
-// import Feature from './components/Feature';
 import PlanTrip from './components/PlanTrip';
 import Treks from './components/Treks';
 import Adventure from './components/Adventure';
 import Spiritual from './components/Spiritual';
 import AboutUs from './components/AboutUs';
-import Hotel from './components/HotelPage'
-import { useRef } from 'react';
+import Hotel from './components/HotelPage';
+import Auth from './components/Authentication'; 
 
 const Layout = ({ children, hideHeader = false, activitiesRef }) => {
   const location = useLocation();
@@ -29,6 +26,7 @@ const Layout = ({ children, hideHeader = false, activitiesRef }) => {
   const hideHeaderAndNavbar = location.pathname === "/auth";
   const shouldHideHeader = hideHeader || location.pathname === "/community-post" || location.pathname.startsWith("/destination/") || location.pathname === "/AboutUs"
   || location.pathname === "/Hotels"
+  
   return (
     <div className="min-h-screen flex flex-col">
       {!hideHeaderAndNavbar && <Navbar activitiesRef={activitiesRef} />}
@@ -48,7 +46,14 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/auth" element={<Auth />} />
+          
+          {/* Using the Auth component here */}
+          <Route path="/auth" element={
+            <Layout activitiesRef={activitiesRef}>
+              <Auth />
+            </Layout>
+          } />
+
           <Route 
             path="/destination/:district" 
             element={
@@ -57,6 +62,7 @@ const App = () => {
               </Layout>
             } 
           />
+          
           <Route path="/home" element={
             <Layout activitiesRef={activitiesRef}>
               <div className='mb-12'>
@@ -65,10 +71,9 @@ const App = () => {
               <div className='mt-16'>
                 <VideoSection />
               </div>
-              {/* <TransportOptions /> */}
               <PopularDestinations />
               <div ref={activitiesRef}>
-              <Activities />
+                <Activities />
               </div>
               <TravelCommunity />
               <div className='mt-16'>
@@ -76,11 +81,13 @@ const App = () => {
               </div>
             </Layout>
           } />
+
           <Route path="/community-post" element={
             <Layout activitiesRef={activitiesRef}>
               <CommunityPostPage />
             </Layout>
           } />
+
           <Route path="/PlanTrip" element={
             <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
               <Layout hideHeader={true} activitiesRef={activitiesRef}>
@@ -123,7 +130,6 @@ const App = () => {
               </Layout>
             </div>
           } />
-
         </Routes>
       </Router>
   );
