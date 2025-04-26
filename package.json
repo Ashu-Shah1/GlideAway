@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.30.0",
     "@lottiefiles/dotlottie-react": "^0.13.2",
     "aos": "^2.3.4",
     "axios": "^1.7.9",
