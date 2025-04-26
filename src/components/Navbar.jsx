@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MapPin, User, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SignInButton, SignOutButton, UserButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 
 const districts = [
   "Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun",
@@ -8,19 +9,17 @@ const districts = [
   "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"
 ];
 
-  const Navbar = ({ activitiesRef }) => {
-    const navigate = useNavigate();
-  
-    const handleActivitiesClick = () => {
-      navigate("/home");
-      setTimeout(() => {
-        activitiesRef?.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100); // wait a bit to let homepage load
-    };
-  
-
+const Navbar = ({ activitiesRef }) => {
+  const navigate = useNavigate();
   const [showDestinations, setShowDestinations] = useState(false);
   const dropdownRef = useRef(null);
+
+  const handleActivitiesClick = () => {
+    navigate("/home");
+    setTimeout(() => {
+      activitiesRef?.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100); // wait a bit to let homepage load
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -38,7 +37,6 @@ const districts = [
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-        
           <div className="flex items-center">
             <MapPin className="h-8 w-8 text-blue-600" aria-label="Logo" />
             <span className="ml-2 text-2xl font-bold text-gray-900">
@@ -63,9 +61,7 @@ const districts = [
               </button>
 
               <div
-                className={`absolute left-0 mt-2 w-[700px] rounded-lg shadow-xl py-4 px-6 border border-gray-300 transition-opacity duration-300 backdrop-blur-md ${
-                  showDestinations ? "opacity-100 visible bg-white/30" : "opacity-0 invisible"
-                }`}
+                className={`absolute left-0 mt-2 w-[700px] rounded-lg shadow-xl py-4 px-6 border border-gray-300 transition-opacity duration-300 backdrop-blur-md ${showDestinations ? "opacity-100 visible bg-white/30" : "opacity-0 invisible"}`}
               >
                 <div className="grid grid-cols-4 gap-4">
                   {[0, 1, 2].map((colIndex) => (
@@ -119,21 +115,31 @@ const districts = [
             </button>
 
             <button 
-            onClick={() => navigate("/AboutUs")} 
-            className="text-gray-700 hover:text-blue-600"
-             >
-            About Us
+              onClick={() => navigate("/AboutUs")} 
+              className="text-gray-700 hover:text-blue-600"
+            >
+              About Us
             </button>
           </div>
 
           <div className="flex items-center space-x-4">
-            <button
-              onClick={() => navigate("/auth")}
-              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              <User className="h-5 w-5" aria-label="User Icon" />
-              <span>Sign In</span>
-            </button>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                  <User className="h-5 w-5" aria-label="User Icon" />
+                  <span>Sign In</span>
+                </button>
+              </SignInButton>
+            </SignedOut>
+
+            <SignedIn>
+              <SignOutButton>
+                <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                  <User className="h-5 w-5" aria-label="User Icon" />
+                  <span>Sign Out</span>
+                </button>
+              </SignOutButton>
+            </SignedIn>
           </div>
         </div>
       </div>
