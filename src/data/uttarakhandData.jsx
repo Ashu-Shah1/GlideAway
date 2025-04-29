@@ -37,7 +37,7 @@ export const spiritualSites = [
         type: "Temple",
         category: "Holy Temple",
         description: "An iconic 13-story temple located on the banks of the Ganges, dedicated to Lord Shiva and known for its stunning architecture and spiritual ambiance.",
-        image: "https://lh3.googleusercontent.com/p/AF1QipOA-mg1n7gjhN7G6nRenbckFsPrSo039a-CUIYu=s1360-w1360-h1020"
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWsYh73K0YyK16x2juVmX_zZhPMxZuKcCi1g&s"
       },  
       {
         name: "Haridwar Har Ki Pauri",
