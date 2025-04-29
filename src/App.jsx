@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react'; // Clerk auth hook
 import Navbar from "./components/Navbar";
 import TravelCommunity from "./components/TravelCommunity";
 import Header from './components/Header';
@@ -7,7 +8,6 @@ import DestinationSearch from './components/DestinationSearch';
 import Footer from "./components/Footer";
 import CommunityPostPage from './components/CommunityPostPage';
 import { PopularDestinations } from './components/PopularDestinations';
-import TransportOptions from './components/TransportOptions';
 import Activities from './components/Activities'; 
 import InteractiveMap from './components/InteractiveMap';
 import VideoSection from './components/VideoSection';
@@ -18,14 +18,17 @@ import Adventure from './components/Adventure';
 import Spiritual from './components/Spiritual';
 import AboutUs from './components/AboutUs';
 import Hotel from './components/HotelPage';
-import Auth from './components/Authentication'; 
+import Auth from './components/Authentication';
 
 const Layout = ({ children, hideHeader = false, activitiesRef }) => {
   const location = useLocation();
+  const { isSignedIn } = useAuth();
   
-  const hideHeaderAndNavbar = location.pathname === "/auth";
-  const shouldHideHeader = hideHeader || location.pathname === "/community-post" || location.pathname.startsWith("/destination/") || location.pathname === "/AboutUs"
-  || location.pathname === "/Hotels"
+  // Hide header/navbar on auth page or when not signed in
+  const hideHeaderAndNavbar = location.pathname === "/auth" || !isSignedIn;
+  const shouldHideHeader = hideHeader || location.pathname === "/community-post" || 
+    location.pathname.startsWith("/destination/") || location.pathname === "/AboutUs" ||
+    location.pathname === "/Hotels";
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -39,31 +42,49 @@ const Layout = ({ children, hideHeader = false, activitiesRef }) => {
   );
 };
 
+const ProtectedRoute = ({ children }) => {
+  const { isSignedIn } = useAuth();
+  
+  if (!isSignedIn) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return children;
+};
+
+const AuthRedirect = () => {
+  const { isSignedIn } = useAuth();
+  
+  if (isSignedIn) {
+    return <Navigate to="/home" replace />;
+  }
+  
+  return (
+    <Layout>
+      <Auth />
+    </Layout>
+  );
+};
+
 const App = () => {
   const activitiesRef = useRef(null);
 
   return (
-      <Router>
-        <Routes>
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          
-          {/* Using the Auth component here */}
-          <Route path="/auth" element={
-            <Layout activitiesRef={activitiesRef}>
-              <Auth />
-            </Layout>
-          } />
+    <Router>
+      <Routes>
+        {/* Root path redirects to auth if not signed in, or home if signed in */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Navigate to="/home" replace />
+          </ProtectedRoute>
+        } />
+        
+        {/* Auth route - shows signup/login */}
+        <Route path="/auth" element={<AuthRedirect />} />
 
-          <Route 
-            path="/destination/:district" 
-            element={
-              <Layout activitiesRef={activitiesRef}>
-                <StateInfo />
-              </Layout>
-            } 
-          />
-          
-          <Route path="/home" element={
+        {/* Home route - protected */}
+        <Route path="/home" element={
+          <ProtectedRoute>
             <Layout activitiesRef={activitiesRef}>
               <div className='mb-12'>
                 <DestinationSearch />
@@ -80,58 +101,90 @@ const App = () => {
                 <InteractiveMap />
               </div>
             </Layout>
-          } />
+          </ProtectedRoute>
+        } />
 
-          <Route path="/community-post" element={
+        {/* All other protected routes */}
+        <Route path="/destination/:district" element={
+          <ProtectedRoute>
+            <Layout activitiesRef={activitiesRef}>
+              <StateInfo />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/community-post" element={
+          <ProtectedRoute>
             <Layout activitiesRef={activitiesRef}>
               <CommunityPostPage />
             </Layout>
-          } />
+          </ProtectedRoute>
+        } />
 
-          <Route path="/PlanTrip" element={
+        <Route path="/PlanTrip" element={
+          <ProtectedRoute>
             <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
               <Layout hideHeader={true} activitiesRef={activitiesRef}>
                 <PlanTrip />
               </Layout>
             </div>
-          } />
-          <Route path="/trek" element={
+          </ProtectedRoute>
+        } />
+
+        <Route path="/trek" element={
+          <ProtectedRoute>
             <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
               <Layout hideHeader={true} activitiesRef={activitiesRef}>
                 <Treks />
               </Layout>
             </div>
-          } />
-          <Route path="/adventure" element={
+          </ProtectedRoute>
+        } />
+
+        <Route path="/adventure" element={
+          <ProtectedRoute>
             <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
               <Layout hideHeader={true} activitiesRef={activitiesRef}>
                 <Adventure />
               </Layout>
             </div>
-          } />
-          <Route path="/spiritual" element={
+          </ProtectedRoute>
+        } />
+
+        <Route path="/spiritual" element={
+          <ProtectedRoute>
             <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
               <Layout hideHeader={true} activitiesRef={activitiesRef}>
                 <Spiritual />
               </Layout>
             </div>
-          } />
-          <Route path="/AboutUs" element={
+          </ProtectedRoute>
+        } />
+
+        <Route path="/AboutUs" element={
+          <ProtectedRoute>
             <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
               <Layout hideHeader={true} activitiesRef={activitiesRef}>
-                <AboutUs/>
+                <AboutUs />
               </Layout>
             </div>
-          } />
-          <Route path="/Hotels" element={
+          </ProtectedRoute>
+        } />
+
+        <Route path="/Hotels" element={
+          <ProtectedRoute>
             <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
               <Layout hideHeader={true} activitiesRef={activitiesRef}>
-                <Hotel/>
+                <Hotel />
               </Layout>
             </div>
-          } />
-        </Routes>
-      </Router>
+          </ProtectedRoute>
+        } />
+
+        {/* Catch-all route redirects to auth */}
+        <Route path="*" element={<Navigate to="/auth" replace />} />
+      </Routes>
+    </Router>
   );
 };
 

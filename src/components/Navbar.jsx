@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { MapPin, User, ChevronDown } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { SignInButton, SignOutButton, UserButton, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { useNavigate, Link } from "react-router-dom";
+import { SignInButton, UserButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 
 const districts = [
   "Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun",
@@ -13,80 +13,86 @@ const Navbar = ({ activitiesRef }) => {
   const navigate = useNavigate();
   const [showDestinations, setShowDestinations] = useState(false);
   const dropdownRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const lastScrollPositionRef = useRef(0);
 
   const handleActivitiesClick = () => {
     navigate("/home");
     setTimeout(() => {
       activitiesRef?.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100); // wait a bit to let homepage load
+    }, 100);
   };
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDestinations(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const handleMouseEnter = () => {
+    clearTimeout(timeoutRef.current);
+    setShowDestinations(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setShowDestinations(false);
+    }, 200);
+  };
+
+  const handleDestinationClick = (district) => {
+    // Store current scroll position
+    lastScrollPositionRef.current = window.scrollY;
+    
+    navigate(`/destination/${district}`, {
+      state: { shouldScroll: true }
+    });
+    setShowDestinations(false);
+  };
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="bg-white shadow-md sticky top-0 z-50 py-3">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
+          {/* Logo Section */}
           <div className="flex items-center">
-            <MapPin className="h-8 w-8 text-blue-600" aria-label="Logo" />
-            <span className="ml-2 text-2xl font-bold text-gray-900">
+            <MapPin className="h-8 w-8 text-blue-600" />
+            <span className="ml-2 text-xl font-bold text-gray-900">
               GlideAway
             </span>
           </div>
 
-          <div className="hidden md:flex items-center space-x-8">
-            <button 
-              onClick={() => navigate("/")}
-              className="text-gray-700 hover:text-blue-600">
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center space-x-6">
+            <Link 
+              to="/"
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-[15px] font-medium transition-colors"
+            >
               Home
-            </button>
+            </Link>
 
-            <div className="relative" ref={dropdownRef}>
+            {/* Destinations Dropdown */}
+            <div 
+              className="relative"
+              ref={dropdownRef}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
               <button
-                className="flex items-center text-gray-700 hover:text-blue-600"
-                onClick={() => setShowDestinations(!showDestinations)}
+                className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-[15px] font-medium transition-colors"
               >
                 Destinations
-                <ChevronDown className="ml-1 h-4 w-4" />
+                <ChevronDown className={`ml-1 h-5 w-5 transition-transform ${showDestinations ? 'rotate-180' : ''}`} />
               </button>
 
               <div
-                className={`absolute left-0 mt-2 w-[700px] rounded-lg shadow-xl py-4 px-6 border border-gray-300 transition-opacity duration-300 backdrop-blur-md ${showDestinations ? "opacity-100 visible bg-white/30" : "opacity-0 invisible"}`}
+                className={`absolute left-0 mt-2 w-[700px] rounded-lg shadow-xl bg-white border border-gray-200 transition-all duration-300 ${showDestinations ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}
               >
-                <div className="grid grid-cols-4 gap-4">
-                  {[0, 1, 2].map((colIndex) => (
-                    <div key={colIndex} className="flex flex-col space-y-2">
-                      {districts.slice(colIndex * 3, colIndex * 3 + 3).map((district) => (
-                        <a
-                          key={district}
-                          href={`/destination/${district}`}
-                          className="text-white hover:text-blue-300 px-3 py-2 rounded-md transition-colors block bg-black/30"
-                        >
-                          {district}
-                        </a>
-                      ))}
-                    </div>
-                  ))}
-                  
-                  <div className="flex flex-col space-y-2">
-                    {districts.slice(9).map((district) => (
-                      <a
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-blue-600 mb-3">Explore Uttarakhand</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {districts.map((district) => (
+                      <button
                         key={district}
-                        href={`/destination/${district}`}
-                        className="text-white hover:text-blue-300 px-3 py-2 rounded-md transition-colors block bg-black/30"
+                        onClick={() => handleDestinationClick(district)}
+                        className="text-left text-gray-800 hover:text-blue-600 px-3 py-2 rounded-md hover:bg-blue-50 transition-colors text-[15px] font-medium"
                       >
                         {district}
-                      </a>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -95,50 +101,64 @@ const Navbar = ({ activitiesRef }) => {
 
             <button 
               onClick={handleActivitiesClick}
-              className="text-gray-700 hover:text-blue-600"
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-[15px] font-medium transition-colors"
             >
               Activities
             </button>
 
-            <button
-              onClick={() => navigate("/Hotels")}
-              className="text-gray-700 hover:text-blue-600"
+            <Link
+              to="/Hotels"
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-[15px] font-medium transition-colors"
             >
               Hotels
-            </button>
+            </Link>
 
-            <button
-              onClick={() => navigate("/community-post")}
-              className="text-gray-700 hover:text-blue-600"
+            <Link
+              to="/community-post"
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-[15px] font-medium transition-colors"
             >
               Community
-            </button>
+            </Link>
 
-            <button 
-              onClick={() => navigate("/AboutUs")} 
-              className="text-gray-700 hover:text-blue-600"
+            <Link 
+              to="/AboutUs" 
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-[15px] font-medium transition-colors"
             >
               About Us
-            </button>
+            </Link>
           </div>
 
+          {/* User Section */}
           <div className="flex items-center space-x-4">
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                  <User className="h-5 w-5" aria-label="User Icon" />
+                <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors text-[15px] font-medium">
+                  <User className="h-5 w-5" />
                   <span>Sign In</span>
                 </button>
               </SignInButton>
             </SignedOut>
 
             <SignedIn>
-              <SignOutButton>
-                <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
-                  <User className="h-5 w-5" aria-label="User Icon" />
-                  <span>Sign Out</span>
-                </button>
-              </SignOutButton>
+              <div className="relative">
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: {
+                        width: "2.5rem",
+                        height: "2.5rem",
+                        borderRadius: "9999px",
+                        border: "2px solid #3b82f6"
+                      },
+                      userButtonTrigger: {
+                        "&:focus": {
+                          boxShadow: "none"
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
             </SignedIn>
           </div>
         </div>
