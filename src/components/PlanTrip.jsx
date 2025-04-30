@@ -44,11 +44,8 @@ const TripPlanner = () => {
   
   const interestOptions = [
     { id: 'attractions', name: 'Must-see attractions', icon: Star },
-    { id: 'food', name: 'Great food', icon: Utensils },
     { id: 'outdoors', name: 'Outdoor adventures', icon: Mountain },
-    { id: 'culture', name: 'Culture & history', icon: Landmark },
-    { id: 'nightlife', name: 'Nightlife', icon: Moon },
-    { id: 'shopping', name: 'Shopping', icon: ShoppingBag },
+    { id: 'culture', name: 'Culture & history', icon: Landmark }
   ];
 
   // Generate sample itinerary
@@ -73,7 +70,6 @@ const TripPlanner = () => {
                 time: i === 0 ? 'Morning' : i === 1 ? 'Afternoon' : 'Evening',
                 duration: '2 hours',
                 rating: 4.5,
-                price: '$$',
                 image: site.image,
                 location: site.location
               });
@@ -93,42 +89,13 @@ const TripPlanner = () => {
                 time: i === 0 ? 'Morning' : i === 1 ? 'Afternoon' : 'Evening',
                 duration: '3 hours',
                 rating: 4.7,
-                price: '$$$',
                 image: spot.image,
                 location: spot.location
               });
             });
           }
-            // Great food
-            if (interests.includes('food')) {
-                activities.push({
-                  type: 'restaurant',
-                  name: `Local ${destination} Cuisine`,
-                  cuisine: 'Traditional local dishes',
-                  time: 'Lunch',
-                  duration: '1.5 hours',
-                  rating: 4.3,
-                  price: '$$',
-                  image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4',
-                  location: destination
-                });
-              }
+            
               
-              // Shopping
-              if (interests.includes('shopping')) {
-                activities.push({
-                  type: 'shopping',
-        name: `${destination} Local Market`,
-        description: 'Explore traditional handicrafts and souvenirs',
-        time: 'Evening',
-        duration: '2 hours',
-        rating: 4.0,
-        price: '$$',
-        image: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df',
-        location: destination
-      });
-    }
-    
     return activities;
   };
   
@@ -144,17 +111,40 @@ const TripPlanner = () => {
     
     // Fill with default activities if not enough
         while (dayActivities.length < 3) {
-            dayActivities.push({
-              type: ['attraction', 'restaurant', 'activity'][dayActivities.length],
-              name: `${destination} ${['Attraction', 'Restaurant', 'Activity'][dayActivities.length]} ${dayIndex + 1}`,
-              description: 'Explore local highlights',
-              time: ['Morning', 'Lunch', 'Afternoon'][dayActivities.length],
-              duration: '2 hours',
-              rating: 4.0,
-              price: '$$',
-              image: uttarakhandDestinations.find(d => d.name === destination)?.image || '',
-              location: destination
-            });
+            const defaultActivities = [
+                {
+                  type: 'shopping',
+                  name: `Explore ${destination} Local Market`,
+                  description: 'Experience the vibrant local culture and shop for souvenirs',
+                  time: 'Morning',
+                  duration: '2 hours',
+                  rating: 4.2,
+                  image: 'https://dehraduntourism.co.in/images/places-to-visit/header/tibetan-market-dehradun-header-dehradun-tourism.jpg.jpg',
+                  location: destination
+                },
+                {
+                  type: 'activity',
+                  name: `${destination} Nature & Sightseeing`,
+                  description: 'Visit scenic spots and enjoy the natural beauty of the region',
+                  time: 'Afternoon',
+                  duration: '3 hours',
+                  rating: 4.7,
+                  image: uttarakhandDestinations.find(d => d.name === destination)?.image || 'https://uttarakhandtourism.gov.in/sites/default/files/2020-09/nainital-lake.jpg',
+                  location: destination
+                },
+                {
+                    type: 'restaurant',
+                    name: `Local ${destination} Cuisine`,
+                    description: 'Taste authentic regional dishes at a popular local restaurant',
+                    time: 'Evening',
+                    duration: '1.5 hours',
+                    rating: 4.5,
+                    image: 'https://www.jaypeehotels.com/blog/wp-content/uploads/2024/04/BLOG-8-2.jpg',
+                    location: destination
+                  }
+                ];
+              
+                dayActivities.push(defaultActivities[dayActivities.length]);
           }
           
           return {

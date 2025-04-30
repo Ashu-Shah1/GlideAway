@@ -393,6 +393,10 @@ function AboutUs() {
                         <span className="text-sm text-blue-200">(Ashu Shah)</span>
                       </div>
                       <div className="flex items-baseline">
+                        <span className="mr-2">+91 9557928562</span>
+                        <span className="text-sm text-blue-200">(Gaurav)</span>
+                      </div>
+                      <div className="flex items-baseline">
                         <span className="mr-2">+91 9760129409</span>
                         <span className="text-sm text-blue-200">(Shrikesh Tiwari)</span>
                       </div>

@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useRef } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Navbar from "./components/Navbar";
