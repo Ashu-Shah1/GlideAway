@@ -260,7 +260,6 @@ const HotelPage = () => {
           },
         }
       );
-
       const destination = destRes.data?.data[0];
       if (!destination) {
         setError("City not found. Try another location.");
