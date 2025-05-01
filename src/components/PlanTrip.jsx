@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Calendar, Users, Star, Utensils, Mountain, Landmark, Moon, ShoppingBag, ArrowRight } from 'lucide-react';
 import { spiritualSites, adventureSpots } from '../data/uttarakhandData';
+
 
 const TripPlanner = () => {
   const [step, setStep] = useState(1);
@@ -15,17 +16,117 @@ const TripPlanner = () => {
   const [suggestions, setSuggestions] = useState([]);
 
   const [showSavePopup, setShowSavePopup] = useState(false);
-   
+  const [myTrips, setMyTrips] = useState(() => {
+    const savedTrips = localStorage.getItem('uttarakhandTrips');
+    return savedTrips ? JSON.parse(savedTrips) : {
+      current: [],
+      upcoming: [],
+      completed: []
+    };
+  });
+  const [showMyTrips, setShowMyTrips] = useState(false);
+
+// Save trips to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('uttarakhandTrips', JSON.stringify(myTrips));
+  }, [myTrips]);
+
+  // Check and update trip statuses periodically
+  useEffect(() => {
+    const checkTripStatuses = () => {
+      setMyTrips(prev => {
+        let hasChanges = false;
+        const updatedTrips = { ...prev };
+        
+        // Check upcoming trips
+        updatedTrips.upcoming = updatedTrips.upcoming.filter(trip => {
+          const newStatus = getTripStatus(new Date(trip.startDate), new Date(trip.endDate));
+          if (newStatus !== 'upcoming') {
+            hasChanges = true;
+            updatedTrips[newStatus].push({ ...trip, status: newStatus });
+            return false;
+          }
+          return true;
+        });
+
+        // Check current trips
+        updatedTrips.current = updatedTrips.current.filter(trip => {
+            const newStatus = getTripStatus(new Date(trip.startDate), new Date(trip.endDate));
+            if (newStatus !== 'current') {
+              hasChanges = true;
+              updatedTrips[newStatus].push({ ...trip, status: newStatus });
+              return false;
+            }
+            return true;
+          });
+          
+          return hasChanges ? updatedTrips : prev;
+        });
+      };
+
+        // Check statuses when component mounts
+        checkTripStatuses();
+    
+        // Set up daily check
+        const interval = setInterval(checkTripStatuses, 24 * 60 * 60 * 1000);
+        return () => clearInterval(interval);
+      }, []);
+    
+      const getTripStatus = (startDate, endDate) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (startDate > today) return 'upcoming';
+        if (endDate < today) return 'completed';
+        return 'current';
+      };
+
   const handleSaveItinerary = () => {
-    // Save logic here (e.g., save to localStorage or API call)
+    if (!itinerary) return;
+    
+    const today = new Date();
+    const tripDate = travelDate ? new Date(travelDate) : new Date();
+    const tripEndDate = new Date(tripDate);
+    tripEndDate.setDate(tripDate.getDate() + tripLength);
+    
+    const newTrip = {
+      id: Date.now(),
+      destination,
+      itinerary,
+      startDate: tripDate.toISOString().split('T')[0],
+      endDate: tripEndDate.toISOString().split('T')[0],
+      status: getTripStatus(tripDate, tripEndDate),
+      createdAt: new Date().toISOString()
+    };
+    
+    setMyTrips(prev => ({
+      ...prev,
+      [newTrip.status]: [...prev[newTrip.status], newTrip]
+    }));
+
     setShowSavePopup(true);
-  
-    // Automatically hide after 2.5 seconds
     setTimeout(() => {
       setShowSavePopup(false);
-    }, 2500);
+    }, 3500);
   };
   
+  const deleteTrip = (tripId) => {
+    setMyTrips(prev => ({
+      current: prev.current.filter(trip => trip.id !== tripId),
+      upcoming: prev.upcoming.filter(trip => trip.id !== tripId),
+      completed: prev.completed.filter(trip => trip.id !== tripId)
+    }));
+  };
+
+  const handleViewDetails = (trip) => {
+    // Set the current trip to view
+    setItinerary(trip.itinerary);
+    // Optionally set the current step to show the itinerary
+    setStep(4);
+    // Close the My Trips modal
+    setShowMyTrips(false);
+  };
+
   const uttarakhandDistricts = [
     "Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", 
     "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", 
@@ -519,9 +620,13 @@ const TripPlanner = () => {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Uttarakhand Trip Planner</h1>
         {renderStep()}
+
+       
       </div>
     </div>
   );
+
+  
 };
 
 export default TripPlanner;
