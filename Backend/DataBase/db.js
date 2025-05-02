@@ -16,20 +16,21 @@ const DistrictSchema = new Schema({
     localCulture: { type: String },
 
 });
-const BlogSchema = new Schema({
-    title: String,
-    content: String,
-    category: String,
-    imageUrl: String,
-    authorName: String,
-    authorAvatar: String,
-    likes: Number,
-    comments: Number,
-    createdAt: { type: Date, default: Date.now }
-  });
-  
-const blogModel = mongoose.model("blogs", BlogSchema);
 
+const blogSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    category: { type: String, required: true },
+    imageUrl: String,
+    authorName: { type: String, required: true },
+    authorAvatar: { type: String, required: true },
+    likes: [{ type: String }],
+    comments: { type: Number, default: 0 },
+    createdAt: { type: Date, default: Date.now }
+});
+  
+  
+const blogModel = mongoose.model("blogs", blogSchema);
 const districtModel = mongoose.model("districts", DistrictSchema);
 const userModel = mongoose.model('users',UserSchema)
 
