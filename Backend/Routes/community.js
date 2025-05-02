@@ -3,7 +3,7 @@ import multer from 'multer';
 import { ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
 import { blogModel } from '../DataBase/db.js';
 import path from 'path';
-import clerk from '@clerk/clerk-sdk-node'; // ✅ Add this line
+import clerk from '@clerk/clerk-sdk-node'; 
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../Utils/cloudinary.js';
 
@@ -86,7 +86,7 @@ CommunityRouter.get('/allblogModels', async (req, res) => {
 
 // Like a blogModel
 CommunityRouter.post('/:id/like', ClerkExpressRequireAuth(), async (req, res) => {
-  const userId = req.auth?.userId; // ✅ Correct way with RequireAuth
+  const userId = req.auth?.userId; 
 
   if (!userId) {
     return res.status(401).json({ message: 'User not authenticated' });

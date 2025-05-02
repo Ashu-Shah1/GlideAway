@@ -22,6 +22,7 @@ const CommunityPage = () => {
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState(null);
   const [hasFetched, setHasFetched] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState({});
@@ -91,6 +92,7 @@ const CommunityPage = () => {
     }
 
     try {
+      setPublishing(true);
       const token = await getToken();
       await axios.post('http://localhost:3000/community-post/create', formData, {
         headers: {
@@ -109,10 +111,12 @@ const CommunityPage = () => {
         authorAvatar: user.profileImageUrl
       });
       setSelectedFile(null);
-      fetchBlogs();
+      await fetchBlogs();
     } catch (err) {
       console.error('Error creating blog:', err);
       setError(err.response?.data?.message || 'Error creating blog post');
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -146,7 +150,6 @@ const CommunityPage = () => {
     } catch (err) {
       console.error('Error liking blog:', err);
       setError('Error updating like. Please try again.');
-      // Revert if API fails
       fetchBlogs();
     }
   };
@@ -247,9 +250,20 @@ const CommunityPage = () => {
               </div>
               <button
                 type="submit"
-                className="w-full bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                className="w-full bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium flex items-center justify-center"
+                disabled={publishing}
               >
-                Publish Blog
+                {publishing ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Publishing...
+                  </>
+                ) : (
+                  'Publish Blog'
+                )}
               </button>
             </form>
           </div>
@@ -314,7 +328,10 @@ const CommunityPage = () => {
 
             {loading ? (
               <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+                <div className="flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500 mb-4"></div>
+                  <p className="text-gray-600">Loading stories...</p>
+                </div>
               </div>
             ) : hasFetched && blogs.length === 0 ? (
               <div className="text-center py-12">
