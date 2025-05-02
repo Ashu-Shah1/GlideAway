@@ -7,7 +7,6 @@ import DestinationSearch from './components/DestinationSearch';
 import Footer from "./components/Footer";
 import CommunityPostPage from './components/CommunityPostPage';
 import { PopularDestinations } from './components/PopularDestinations';
-import TransportOptions from './components/TransportOptions';
 import Activities from './components/Activities'; 
 import InteractiveMap from './components/InteractiveMap';
 import VideoSection from './components/VideoSection';
@@ -18,7 +17,7 @@ import Adventure from './components/Adventure';
 import Spiritual from './components/Spiritual';
 import AboutUs from './components/AboutUs';
 import Hotel from './components/HotelPage';
-import Auth from './components/Authentication'; // Importing the Auth component
+import Auth from './components/Authentication';
 
 const Layout = ({ children, hideHeader = false, activitiesRef }) => {
   const location = useLocation();
@@ -130,8 +129,6 @@ const App = () => {
               </Layout>
             </div>
           } />
-          
-          {/* Additional Routes for PlanTrip, Treks, etc. */}
         </Routes>
       </Router>
   );
