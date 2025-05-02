@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { MessageSquare, Heart, Share2, Mountain, Camera, Compass, MapPin, PenTool, ChevronRight, X } from 'lucide-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import { 
+  MessageSquare, Heart, Share2, Mountain, Camera, 
+  Compass, MapPin, PenTool, ChevronRight, X 
+} from 'lucide-react';
 
 const CommunityPage = () => {
+  const { user, isSignedIn } = useUser();
+  const { getToken } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isWriting, setIsWriting] = useState(false);
   const [blogs, setBlogs] = useState([]);
@@ -11,11 +17,14 @@ const CommunityPage = () => {
     content: '',
     category: '',
     imageUrl: '',
-    authorName: 'Travel Enthusiast', // Default author name
-    authorAvatar: 'https://randomuser.me/api/portraits/lego/1.jpg' // Default avatar
+    authorName: isSignedIn ? `${user?.firstName} ${user?.lastName}` : 'Travel Enthusiast',
+    authorAvatar: isSignedIn ? user?.profileImageUrl : 'https://randomuser.me/api/portraits/lego/1.jpg'
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [expandedPosts, setExpandedPosts] = useState({});
 
   const travelCategories = [
     { id: 'char-dham', name: 'Char Dham Yatra', icon: <Mountain size={20} /> },
@@ -31,24 +40,31 @@ const CommunityPage = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const url = selectedCategory === 'all' 
-        ? 'http://localhost:3000/community-post/allBlogs'
-        : `http://localhost:3000/community-post/allBlogs?category=${selectedCategory}`;
-      
+      const url = `http://localhost:3000/community-post/allblogModels${selectedCategory !== 'all' ? `?category=${selectedCategory}` : ''}`;
       const response = await axios.get(url);
-      setBlogs(response.data);
-    } catch (error) {
-      console.error('Error fetching blogs:', error);
+      setBlogs(Array.isArray(response?.data) ? response.data : []);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching blogs:', err);
+      setError('Failed to load blogs. Please try again later.');
+      setBlogs([]);
     } finally {
       setLoading(false);
+      setHasFetched(true);
     }
+  };
+
+  const toggleExpandPost = (postId) => {
+    setExpandedPosts(prev => ({
+      ...prev,
+      [postId]: !prev[postId]
+    }));
   };
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setSelectedFile(file);
-      // Preview the image
       setNewBlog({
         ...newBlog,
         imageUrl: URL.createObjectURL(file)
@@ -59,44 +75,79 @@ const CommunityPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!isSignedIn) {
+      setError('Please sign in to create a blog post');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('title', newBlog.title);
     formData.append('content', newBlog.content);
     formData.append('category', newBlog.category);
-    formData.append('authorName', newBlog.authorName);
-    formData.append('authorAvatar', newBlog.authorAvatar);
+    formData.append('authorName', `${user.firstName} ${user.lastName}`);
+    formData.append('authorAvatar', user.profileImageUrl);
     if (selectedFile) {
       formData.append('image', selectedFile);
     }
 
     try {
+      const token = await getToken();
       await axios.post('http://localhost:3000/community-post/create', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
         }
       });
+      
       setIsWriting(false);
       setNewBlog({
         title: '',
         content: '',
         category: '',
         imageUrl: '',
-        authorName: 'Travel Enthusiast',
-        authorAvatar: 'https://randomuser.me/api/portraits/lego/1.jpg'
+        authorName: `${user.firstName} ${user.lastName}`,
+        authorAvatar: user.profileImageUrl
       });
       setSelectedFile(null);
       fetchBlogs();
-    } catch (error) {
-      console.error('Error creating blog:', error);
+    } catch (err) {
+      console.error('Error creating blog:', err);
+      setError(err.response?.data?.message || 'Error creating blog post');
     }
   };
 
   const handleLike = async (blogId) => {
+    if (!isSignedIn) {
+      setError('Please sign in to like posts');
+      return;
+    }
+
     try {
-      await axios.post(`http://localhost:3000/community-post/${blogId}/like`);
+      // Optimistic update
+      setBlogs(prevBlogs => 
+        prevBlogs.map(blog => 
+          blog._id === blogId 
+            ? { 
+                ...blog, 
+                likes: blog.likes?.includes(user.id) 
+                  ? blog.likes.filter(id => id !== user.id) 
+                  : [...(blog.likes || []), user.id] 
+              } 
+            : blog
+        )
+      );
+
+      const token = await getToken();
+      await axios.post(`/community-post/${blogId}/like`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    } catch (err) {
+      console.error('Error liking blog:', err);
+      setError('Error updating like. Please try again.');
+      // Revert if API fails
       fetchBlogs();
-    } catch (error) {
-      console.error('Error liking blog:', error);
     }
   };
 
@@ -111,12 +162,20 @@ const CommunityPage = () => {
           <button 
             onClick={() => setIsWriting(true)}
             className="bg-white text-emerald-600 px-6 py-2 rounded-lg font-semibold hover:bg-emerald-50 transition-colors flex items-center"
+            disabled={!isSignedIn}
           >
             <PenTool className="mr-2" size={20} />
-            Write a Blog
+            {isSignedIn ? 'Write a Blog' : 'Sign In to Write'}
           </button>
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          {error}
+        </div>
+      )}
 
       {/* Blog Writing Modal */}
       {isWriting && (
@@ -125,7 +184,10 @@ const CommunityPage = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold">Write Your Blog</h2>
               <button 
-                onClick={() => setIsWriting(false)} 
+                onClick={() => {
+                  setIsWriting(false);
+                  setError(null);
+                }} 
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X size={24} />
@@ -166,7 +228,7 @@ const CommunityPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Featured Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Featured Image (Optional)</label>
                 <input
                   type="file"
                   accept="image/*"
@@ -235,14 +297,18 @@ const CommunityPage = () => {
         <div className="lg:col-span-3">
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Travel Stories</h2>
+              <h2 className="text-2xl font-semibold">
+                {selectedCategory === 'all' ? 'All Travel Stories' : 
+                 travelCategories.find(c => c.id === selectedCategory)?.name + ' Stories'}
+              </h2>
               <select 
                 className="border rounded-lg px-4 py-2 text-gray-600 bg-white"
-                onChange={(e) => console.log(e.target.value)} // Add sorting logic
+                onChange={(e) => {
+                  // Add sorting logic here if needed
+                }}
               >
                 <option>Most Recent</option>
                 <option>Most Popular</option>
-                <option>Most Discussed</option>
               </select>
             </div>
 
@@ -250,9 +316,33 @@ const CommunityPage = () => {
               <div className="flex justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
               </div>
-            ) : blogs.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <p>No blogs found. Be the first to share your story!</p>
+            ) : hasFetched && blogs.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="max-w-md mx-auto">
+                  <img 
+                    src="https://illustrations.popsy.co/gray/writing.svg" 
+                    alt="No blogs" 
+                    className="w-full h-48 object-contain mb-4"
+                  />
+                  <h3 className="text-xl font-medium text-gray-600 mb-2">
+                    {selectedCategory === 'all' 
+                      ? 'No Blogs Yet' 
+                      : `No ${travelCategories.find(c => c.id === selectedCategory)?.name} Stories`}
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    {selectedCategory === 'all'
+                      ? 'Be the first to share your travel experience!'
+                      : `No one has shared ${travelCategories.find(c => c.id === selectedCategory)?.name} stories yet.`}
+                  </p>
+                  <button
+                    onClick={() => setIsWriting(true)}
+                    className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-colors flex items-center mx-auto"
+                    disabled={!isSignedIn}
+                  >
+                    <PenTool className="mr-2" size={18} />
+                    {isSignedIn ? 'Share Your Story' : 'Sign In to Write'}
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="grid gap-10">
@@ -260,7 +350,7 @@ const CommunityPage = () => {
                   <div key={blog._id} className="border-b pb-10 last:border-0">
                     <div className="flex items-center space-x-3 mb-4">
                       <img
-                        src={blog.authorAvatar}
+                        src={blog.authorAvatar || 'https://randomuser.me/api/portraits/lego/1.jpg'}
                         alt={blog.authorName}
                         className="w-10 h-10 rounded-full object-cover"
                       />
@@ -278,31 +368,56 @@ const CommunityPage = () => {
                     
                     <h2 className="text-xl font-semibold mb-3">{blog.title}</h2>
                     
-                    {/* Enhanced Image Section */}
                     {blog.imageUrl && (
-                      <div className="w-full h-80 mb-6 rounded-xl overflow-hidden shadow-md group">
+                      <div className="w-full h-80 mb-6 rounded-xl overflow-hidden">
                         <img
                           src={blog.imageUrl}
                           alt={blog.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover"
+                          style={{ objectFit: 'cover' }}
                           loading="lazy"
                         />
                       </div>
                     )}
                     
-                    <p className="text-gray-600 mb-6">{blog.content.substring(0, 200)}...</p>
+                    <div className="text-gray-600 mb-6 whitespace-pre-line">
+                      {expandedPosts[blog._id] || blog.content.length <= 300 ? (
+                        blog.content
+                      ) : (
+                        <>
+                          {blog.content.substring(0, 300)}
+                          <button 
+                            onClick={() => toggleExpandPost(blog._id)}
+                            className="text-emerald-600 hover:underline ml-1"
+                          >
+                            Read more
+                          </button>
+                        </>
+                      )}
+                      {expandedPosts[blog._id] && blog.content.length > 300 && (
+                        <button 
+                          onClick={() => toggleExpandPost(blog._id)}
+                          className="text-emerald-600 hover:underline ml-1 block mt-2"
+                        >
+                          Show less
+                        </button>
+                      )}
+                    </div>
                     
                     <div className="flex items-center space-x-6 text-gray-500">
                       <button 
                         onClick={() => handleLike(blog._id)}
                         className="flex items-center space-x-1 hover:text-emerald-600"
                       >
-                        <Heart size={18} className={blog.likes > 0 ? 'fill-current' : ''} />
-                        <span>{blog.likes}</span>
+                        <Heart 
+                          size={18} 
+                          className={blog.likes?.includes(user?.id) ? 'fill-current text-emerald-600' : ''} 
+                        />
+                        <span>{blog.likes?.length || 0}</span>
                       </button>
                       <button className="flex items-center space-x-1 hover:text-emerald-600">
                         <MessageSquare size={18} />
-                        <span>{blog.comments}</span>
+                        <span>{blog.comments || 0}</span>
                       </button>
                       <button className="flex items-center space-x-1 hover:text-emerald-600">
                         <Share2 size={18} />
