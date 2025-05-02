@@ -142,7 +142,7 @@ const CommunityPage = () => {
       );
 
       const token = await getToken();
-      await axios.post(`/community-post/${blogId}/like`, {}, {
+      await axios.post(`http://localhost:3000/community-post/${blogId}/like`, {}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
