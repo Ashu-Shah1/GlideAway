@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Calendar, Users, Star, Utensils, Mountain, Landmark, Moon, ShoppingBag, ArrowRight } from 'lucide-react';
 import { spiritualSites, adventureSpots } from '../data/uttarakhandData';
-
+import TripCard from './TripCard';
 
 const TripPlanner = () => {
   const [step, setStep] = useState(1);
@@ -110,12 +110,36 @@ const TripPlanner = () => {
     }, 3500);
   };
   
-  const deleteTrip = (tripId) => {
-    setMyTrips(prev => ({
-      current: prev.current.filter(trip => trip.id !== tripId),
-      upcoming: prev.upcoming.filter(trip => trip.id !== tripId),
-      completed: prev.completed.filter(trip => trip.id !== tripId)
-    }));
+//   const deleteTrip = (tripId) => {
+//     setMyTrips(prev => {
+//     const updatedTrips = {
+//       current: prev.current.filter(trip => trip.id !== tripId),
+//       upcoming: prev.upcoming.filter(trip => trip.id !== tripId),
+//       completed: prev.completed.filter(trip => trip.id !== tripId)
+//     };
+//     // Update local storage immediately
+//     localStorage.setItem('uttarakhandTrips', JSON.stringify(updatedTrips));
+      
+//     return updatedTrips;
+//     });
+//   };
+
+const deleteTrip = (tripId) => {
+    // Get current data from localStorage
+    const currentData = JSON.parse(localStorage.getItem('uttarakhandTrips') || '{}');
+    
+    // Filter out the deleted trip
+    const updatedTrips = {
+      current: currentData.current?.filter(trip => trip.id !== tripId) || [],
+      upcoming: currentData.upcoming?.filter(trip => trip.id !== tripId) || [],
+      completed: currentData.completed?.filter(trip => trip.id !== tripId) || []
+    };
+    
+    // Save back to localStorage
+    localStorage.setItem('uttarakhandTrips', JSON.stringify(updatedTrips));
+    
+    // Update state
+    setMyTrips(updatedTrips);
   };
 
   const handleViewDetails = (trip) => {
@@ -308,6 +332,7 @@ const TripPlanner = () => {
     setDestination(name);
     setSuggestions([]);
   };
+
 
   // Render current step
   const renderStep = () => {

@@ -18,6 +18,7 @@ import Spiritual from './components/Spiritual';
 import AboutUs from './components/AboutUs';
 import Hotel from './components/HotelPage';
 import Auth from './components/Authentication';
+import TripDetails from './components/TripDetails';
 
 const Layout = ({ children, hideHeader = false, activitiesRef }) => {
   const location = useLocation();
@@ -129,6 +130,9 @@ const App = () => {
               </Layout>
             </div>
           } />
+
+          <Route path="/trip-details" element={<TripDetails />} 
+          />
         </Routes>
       </Router>
   );

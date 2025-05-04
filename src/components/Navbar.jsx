@@ -36,7 +36,14 @@ const Navbar = ({ activitiesRef }) => {
   };
 
   const handleViewDetails = (trip) => {
-    navigate('/trip-details', { state: { trip } });
+    lastScrollPositionRef.current = window.scrollY;
+    navigate('/trip-details', { 
+      state: { 
+        trip,
+        returnPath: '/',
+      scrollPosition: lastScrollPositionRef.current
+       }
+       });
     setShowMyTrips(false);
   };
 
@@ -188,7 +195,7 @@ const Navbar = ({ activitiesRef }) => {
             </SignedIn>
           </div>
 
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center ">
           <button 
            onClick={() => setShowMyTrips(!showMyTrips)}
            className="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-md"
