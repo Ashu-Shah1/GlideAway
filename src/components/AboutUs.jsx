@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   Map,
@@ -19,13 +19,18 @@ import {
   ChevronDown,
   Send,
   CheckCircle,
+  BookText,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import emailjs from '@emailjs/browser';
 
 function AboutUs() {
   const teamSectionRef = useRef(null);
   const contactSectionRef = useRef(null);
+  const formRef = useRef(null);
   const location = useLocation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     if (location.hash === '#contact') {
@@ -42,6 +47,43 @@ function AboutUs() {
 
   const scrollToTeam = () => {
     teamSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const templateParams = {
+      team_emails: 'iamashu.shah12@gmail.com,gauravsinghnegi54@gmail.com,tiwarishrikesh96@gmail.com',
+      user_name: e.target.user_name.value,
+      user_email: e.target.user_email.value,
+      subject: e.target.subject.value,
+      message: `
+From: ${e.target.user_name.value} <${e.target.user_email.value}>
+Subject: ${e.target.subject.value}
+
+${e.target.message.value}
+
+---
+Sent via Uttarakhand Travel Guide contact form
+      `,
+    };
+
+    try {
+      await emailjs.send(
+        'service_2sbecoc', 
+        'your_template_id', 
+        templateParams,
+        'your_public_key' 
+      );
+      setSubmitSuccess(true);
+      formRef.current.reset();
+    } catch (error) {
+      console.error('Failed to send:', error);
+      alert('Message failed to send. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const teamMembers = [
@@ -61,34 +103,34 @@ function AboutUs() {
 
   const features = [
     {
-      title: "Vibrant Travel Community",
-      description: "Join our network of Himalayan explorers to share experiences, get insider tips, and find travel companions for your next adventure.",
-      icon: <Users className="w-8 h-8" />,
+      title: "Travel Community & Blogs",
+      description: "Read inspiring travel stories from fellow Himalayan explorers or write your own to share experiences, itineraries, and hidden gems.",
+      icon: <BookText className="w-8 h-8" />,
     },
     {
-      title: "Curated Accommodations",
-      description: "From luxury mountain resorts to authentic village homestays, we personally verify every property to ensure quality and value.",
-      icon: <Hotel className="w-8 h-8" />,
-    },
-    {
-      title: "Diverse Himalayan Experiences",
-      description: "Explore Uttarakhand through our handpicked experiences, categorized into Trekking trails, Spiritual tours to sacred shrines, and adrenaline-packed Adventure sports — crafted for every kind of traveler",
-      icon: <Mountain className="w-8 h-8" />,
-    },
-    {
-      title: "Live Weather Updates",
-      description: "Plan smarter with real-time weather forecasts for your destination, so you're always ready for the Himalayas' mood swings.",
+      title: "District-wise Cultural & Weather Insights",
+      description: "Dive into detailed information about each district in Uttarakhand, including cultural heritage, local cuisine, and real-time weather updates.",
       icon: <CloudSun className="w-8 h-8" />,
     },
     {
-      title: "Secure User Authentication",
-      description: "Your data is protected with end-to-end encryption and secure login systems, including email, OTP, and social login support.",
+      title: "Categorized Activities",
+      description: "Explore Uttarakhand through our curated activity categories: thrilling Trekking routes, peaceful Spiritual tours, and high-octane Adventure sports.",
+      icon: <Mountain className="w-8 h-8" />,
+    },
+    {
+      title: "Verified Hotel Listings",
+      description: "Discover and book from a range of accommodations — from cozy village stays to luxurious mountain resorts — using real-time Booking.com data.",
+      icon: <Hotel className="w-8 h-8" />,
+    },
+    {
+      title: "Secure Authentication",
+      description: "Enjoy peace of mind with end-to-end encrypted logins powered by Clerk, supporting email, OTP, and social logins for safe and easy access.",
       icon: <ShieldCheck className="w-8 h-8" />,
     },
     {
-      title: "District-Wise Cultural Insights",
-      description: "Discover the unique traditions, festivals, cuisines, and heritage of each district in Uttarakhand — curated to deepen your understanding of local culture.",
-      icon: <WandSparkles className="w-8 h-8" />,
+      title: "Interactive Map Navigation",
+      description: "Visualize your journey with our dynamic map interface, helping you discover routes, points of interest, and plan trips effortlessly.",
+      icon: <Map className="w-8 h-8" />,
     },
   ];
 
@@ -412,23 +454,28 @@ function AboutUs() {
                 className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 border border-white border-opacity-20"
               >
                 <h3 className="text-2xl font-bold mb-6">Send Us a Message</h3>
-                <form className="space-y-6">
+                <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <input
                       type="text"
+                      name="user_name"
                       placeholder="Your Name"
                       className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 focus:outline-none focus:border-blue-300 placeholder-white placeholder-opacity-70 text-white"
+                      required
                     />
                   </div>
                   <div>
                     <input
                       type="email"
+                      name="user_email"
                       placeholder="Your Email"
                       className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 focus:outline-none focus:border-blue-300 placeholder-white placeholder-opacity-70 text-white"
+                      required
                     />
                   </div>
                   <div className="relative">
                     <select
+                      name="subject"
                       className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:border-blue-300 text-white appearance-none cursor-pointer"
                       style={{
                         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23bfdbfe' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
@@ -436,29 +483,57 @@ function AboutUs() {
                         backgroundPosition: "right 0.75rem center",
                         backgroundSize: "1.25rem",
                       }}
+                      required
                     >
                       <option value="" className="bg-blue-900 text-white">Regarding...</option>
-                      <option value="project-feedback" className="bg-blue-900 text-white hover:bg-blue-800">Project Feedback</option>
-                      <option value="collaboration" className="bg-blue-900 text-white hover:bg-blue-800">Collaboration Opportunity</option>
-                      <option value="technical-question" className="bg-blue-900 text-white hover:bg-blue-800">Technical Question</option>
-                      <option value="other" className="bg-blue-900 text-white hover:bg-blue-800">Other Inquiry</option>
+                      <option value="Project Feedback" className="bg-blue-900 text-white hover:bg-blue-800">Project Feedback</option>
+                      <option value="Collaboration Opportunity" className="bg-blue-900 text-white hover:bg-blue-800">Collaboration Opportunity</option>
+                      <option value="Technical Question" className="bg-blue-900 text-white hover:bg-blue-800">Technical Question</option>
+                      <option value="Other Inquiry" className="bg-blue-900 text-white hover:bg-blue-800">Other Inquiry</option>
                     </select>
                   </div>
                   <div>
                     <textarea
+                      name="message"
                       placeholder="Your Message"
                       rows="4"
                       className="w-full px-4 py-3 rounded-lg bg-white bg-opacity-10 border border-white border-opacity-20 focus:outline-none focus:border-blue-300 placeholder-white placeholder-opacity-70 text-white"
+                      required
                     ></textarea>
                   </div>
                   <motion.button
+                    type="submit"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="bg-blue-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow-lg w-full"
+                    className="bg-blue-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow-lg w-full flex items-center justify-center"
+                    disabled={isSubmitting}
                   >
-                    Send Message
+                    {isSubmitting ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </span>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5 mr-2" />
+                        Send Message
+                      </>
+                    )}
                   </motion.button>
                 </form>
+                {submitSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 p-3 bg-green-500 bg-opacity-20 text-green-300 rounded-lg flex items-center"
+                  >
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Message sent successfully! We'll get back to you soon.
+                  </motion.div>
+                )}
               </motion.div>
             </div>
           </div>
