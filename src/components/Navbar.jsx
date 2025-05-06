@@ -195,14 +195,14 @@ const Navbar = ({ activitiesRef }) => {
             </SignedIn>
           </div>
 
-          <div className="flex justify-between items-center ">
+          {/* <div className="flex justify-between items-center ">
           <button 
            onClick={() => setShowMyTrips(!showMyTrips)}
            className="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-md"
            >
             My Trips
           </button>
-          </div>
+          </div> */}
           </div>
           
           {showMyTrips && (
