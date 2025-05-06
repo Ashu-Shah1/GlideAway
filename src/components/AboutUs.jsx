@@ -431,10 +431,6 @@ Sent via Uttarakhand Travel Guide contact form
                     </div>
                     <div>
                       <div className="flex items-baseline">
-                        <span className="mr-2">+91 9263322138</span>
-                        <span className="text-sm text-blue-200">(Ashu Shah)</span>
-                      </div>
-                      <div className="flex items-baseline">
                         <span className="mr-2">+91 9557928562</span>
                         <span className="text-sm text-blue-200">(Gaurav)</span>
                       </div>
